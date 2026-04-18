@@ -1,1058 +1,653 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <link rel="icon" type="image/jpeg" href="5413489003538879528.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PetMatch - Демо</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>PetMatch AI</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f0f2f5;
-            overflow-x: hidden;
+        :root {
+            --bg-app: #f4f5f7; --bg-card: #ffffff; --text-main: #1e293b; --text-sec: #64748b;
+            --primary: #6366f1; --primary-light: #e0e7ff; --success: #10b981; --danger: #ef4444;
+            --radius: 24px; --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
-
-        .app-container {
-            max-width: 430px;
-            margin: 0 auto;
-            min-height: 100vh;
-            background: #fff;
-            position: relative;
-            box-shadow: 0 0 40px rgba(0,0,0,0.1);
-        }
-
-        @media (min-width: 768px) {
-            body {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 20px;
-            }
-            .app-container {
-                min-height: calc(100vh - 40px);
-                border-radius: 20px;
-                overflow: hidden;
-            }
-        }
-
-        .header {
-            padding: 12px 20px;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .logo {
-            font-size: 22px;
-            font-weight: 700;
-            color: #fd5c63;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .header-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            transition: background 0.2s;
-        }
-
-        .header-btn:hover { background: #f5f5f5; }
-
-        .filters {
-            display: flex;
-            gap: 8px;
-            padding: 12px 20px;
-            background: #fff;
-            border-bottom: 1px solid #f0f0f0;
-            overflow-x: auto;
-        }
-
-        .filters::-webkit-scrollbar { display: none; }
-
-        .filter-btn {
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: 1px solid #e0e0e0;
-            background: #fff;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-
-        .filter-btn.active {
-            background: #fd5c63;
-            border-color: #fd5c63;
-            color: #fff;
-        }
-
-        .card-container {
-            position: relative;
-            height: 480px;
-            margin: 20px;
-            touch-action: none;
-        }
-
-        @media (min-width: 768px) {
-            .card-container { height: 420px; }
-        }
-
-        .card {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            cursor: grab;
-            user-select: none;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            touch-action: none;
-        }
-
-        .card:active { cursor: grabbing; }
-
-        .card-image {
-            width: 100%;
-            height: 78%;
-            object-fit: cover;
-            pointer-events: none;
-        }
-
-        .card-gradient {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 45%;
-            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
-            pointer-events: none;
-        }
-
-        .card-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px;
-            color: #fff;
-            z-index: 2;
-        }
-
-        .pet-name {
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .pet-meta {
-            font-size: 15px;
-            opacity: 0.9;
-            margin-bottom: 6px;
-        }
-
-        .pet-desc {
-            font-size: 13px;
-            line-height: 1.4;
-            opacity: 0.8;
-        }
-
-        .actions {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 10px 20px 25px;
-        }
-
-        .action-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 24px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .action-btn:hover { transform: scale(1.08); }
-
-        .dislike-btn {
-            background: #fff;
-            color: #fd5c63;
-        }
-
-        .like-btn {
-            background: #fd5c63;
-            color: #fff;
-        }
-
-        .nav {
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 20px 20px;
-            background: #fff;
-            border-top: 1px solid #f0f0f0;
-            position: sticky;
-            bottom: 0;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            color: #999;
-            font-size: 11px;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .nav-item.active { color: #fd5c63; }
-        .nav-icon { font-size: 22px; }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-        }
-
-        .empty-icon { font-size: 60px; margin-bottom: 16px; }
-        .empty-title { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 8px; }
-        .empty-text { color: #999; font-size: 15px; margin-bottom: 24px; }
-
-        .favorites-list { padding: 16px; }
-
-        .favorite-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            background: #fff;
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .favorite-item:hover { transform: translateX(4px); }
-
-        .favorite-avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .favorite-info { flex: 1; }
-        .favorite-name { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 3px; }
-        .favorite-status { font-size: 13px; color: #fd5c63; }
-
-        .chat-header {
-            padding: 12px 16px;
-            background: #fff;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
-        .chat-user { flex: 1; }
-        .chat-name { font-weight: 700; font-size: 16px; }
-        .chat-status { font-size: 13px; color: #4CAF50; }
-
-        .chat-messages {
-            padding: 16px;
-            height: calc(100vh - 180px);
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-
-        @media (min-width: 768px) {
-            .chat-messages { height: 320px; }
-        }
-
-        .message {
-            max-width: 75%;
-            padding: 10px 14px;
-            border-radius: 16px;
-            font-size: 15px;
-            line-height: 1.4;
-            margin-bottom: 10px;
-        }
-
-        .message-own {
-            margin-left: auto;
-            background: #fd5c63;
-            color: #fff;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message-other {
-            background: #fff;
-            color: #333;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-
-        .message-time { font-size: 11px; opacity: 0.7; margin-top: 4px; text-align: right; }
-
-        .chat-input-container {
-            padding: 12px 16px;
-            background: #fff;
-            border-top: 1px solid #f0f0f0;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .chat-input {
-            flex: 1;
-            border: none;
-            background: #f0f0f0;
-            padding: 12px 16px;
-            border-radius: 20px;
-            font-size: 15px;
-            outline: none;
-            font-family: inherit;
-        }
-
-        .send-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #fd5c63;
-            border: none;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .form-container { padding: 20px; }
-        .form-title { font-size: 22px; font-weight: 700; color: #333; margin-bottom: 20px; text-align: center; }
+        [data-theme="dark"] { --bg-app: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sec: #94a3b8; --primary: #818cf8; --primary-light: #312e81; --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+        [data-theme="pink"] { --bg-app: #fdf2f8; --primary: #d946ef; --primary-light: #fae8ff; }
+        [data-theme="indigo"] { --bg-app: #eff6ff; --primary: #2563eb; --primary-light: #bfdbfe; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: 'Inter', system-ui, sans-serif; }
+        body { background: var(--bg-app); color: var(--text-main); height: 100vh; display: flex; justify-content: center; overflow: hidden; transition: background 0.4s; }
+        .app-wrapper { width: 100%; max-width: 480px; height: 100%; background: var(--bg-app); display: flex; flex-direction: column; position: relative; transition: max-width 0.4s; box-shadow: 0 0 50px rgba(0,0,0,0.05); }
+        body.wide-mode .app-wrapper { max-width: 1000px; box-shadow: none; }
+        main { flex: 1; position: relative; overflow: hidden; }
+        .screen { position: absolute; inset: 0; display: none; flex-direction: column; background: var(--bg-app); padding-bottom: 80px; overflow-y: auto; animation: fadeIn 0.3s; }
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        header { padding: 16px 20px; background: var(--bg-card); display: flex; justify-content: space-between; align-items: center; z-index: 20; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+        .icon-btn { padding: 8px; border-radius: 50%; background: var(--bg-app); cursor: pointer; transition: 0.2s; }
+        .icon-btn:active { transform: scale(0.9); }
+        .auth-screen { justify-content: center; align-items: center; padding: 30px; }
+        .auth-card { background: var(--bg-card); padding: 40px 30px; border-radius: 30px; box-shadow: var(--shadow); width: 100%; max-width: 400px; text-align: center; }
+        .auth-input { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--primary-light); margin: 8px 0; background: var(--bg-app); color: var(--text-main); font-size: 1rem; }
+        .auth-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1.1rem; margin-top: 15px; }
+        .feed-container { flex: 1; position: relative; margin: 10px; display: flex; justify-content: center; align-items: center; }
+        .card-stack { width: 100%; max-width: 360px; height: 85%; position: relative; }
+        .pet-card { position: absolute; width: 100%; height: 100%; background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; touch-action: none; cursor: grab; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .pet-card.dragging { transition: none; cursor: grabbing; }
+        .pet-img { width: 100%; height: 65%; object-fit: cover; pointer-events: none; }
+        .pet-info { padding: 20px; }
+        .pet-name { font-size: 1.8rem; font-weight: 800; }
+        .pet-meta { color: var(--primary); background: var(--primary-light); padding: 4px 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; display: inline-block; margin: 4px 0; }
+        .controls { position: absolute; bottom: 90px; left: 0; right: 0; display: flex; justify-content: center; gap: 20px; z-index: 20; }
+        .btn-act { width: 56px; height: 56px; border-radius: 50%; border: none; background: var(--bg-card); box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-act:active { transform: scale(0.9); }
+        .btn-pass { color: var(--danger); } .btn-like { color: var(--success); } .btn-info { color: var(--text-sec); width: 44px; height: 44px; margin-top: 6px; }
+        .content-grid { padding: 20px; display: grid; gap: 16px; max-width: 900px; margin: 0 auto; width: 100%; }
+        .grid-2 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+        body.wide-mode .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .fav-item { background: var(--bg-card); border-radius: 20px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; height: 140px; transition: transform 0.2s; cursor: pointer; }
+        .fav-item:hover { transform: translateY(-3px); }
+        .fav-img { width: 140px; object-fit: cover; }
+        .fav-info { padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .fav-btn { background: var(--primary); color: white; padding: 8px 12px; border-radius: 20px; border: none; font-weight: 600; cursor: pointer; width: fit-content; margin-top: 5px; }
         .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px; }
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            outline: none;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #fd5c63; }
-        .form-textarea { min-height: 80px; resize: vertical; }
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: #fd5c63;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-        .page { display: none; }
-        .page.active { display: block; }
-
-        .pet-detail {
-            background: #fff;
-            min-height: 100vh;
-        }
-
-        .pet-detail-image {
-            width: 100%;
-            height: 50vh;
-            object-fit: cover;
-        }
-
-        @media (min-width: 768px) {
-            .pet-detail-image { height: 300px; }
-        }
-
-        .pet-detail-content { padding: 24px 20px; }
-
-        .pet-detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .pet-detail-name { font-size: 28px; font-weight: 700; color: #333; }
-        .pet-detail-meta { font-size: 16px; color: #666; margin-top: 4px; }
-
-        .pet-detail-section { margin-bottom: 24px; }
-        .pet-detail-label { font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .pet-detail-text { font-size: 16px; color: #333; line-height: 1.5; }
-
-        .pet-detail-owner {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-
-        .owner-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .owner-info { flex: 1; }
-        .owner-name { font-weight: 700; color: #333; margin-bottom: 2px; }
-        .owner-status { font-size: 13px; color: #4CAF50; }
-
-        .chat-btn {
-            padding: 12px 24px;
-            background: #fd5c63;
-            color: #fff;
-            border: none;
-            border-radius: 24px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .stamp {
-            position: absolute;
-            top: 40px;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            opacity: 0;
-            transform: rotate(-15deg);
-            border: 4px solid;
-            z-index: 10;
-            transition: opacity 0.2s;
-        }
-
-        .stamp-like { right: 40px; color: #4CAF50; border-color: #4CAF50; }
-        .stamp-nope { left: 40px; color: #fd5c63; border-color: #fd5c63; }
+        .form-label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-sec); }
+        .form-control { width: 100%; padding: 14px; border: 2px solid var(--primary-light); border-radius: 12px; background: var(--bg-card); color: var(--text-main); font-size: 1rem; }
+        textarea.form-control { resize: none; }
+        .chat-area { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; max-width: 800px; margin: 0 auto; width: 100%; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 16px; line-height: 1.4; font-size: 0.95rem; }
+        .msg-in { background: var(--bg-card); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-out { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .chat-bar { padding: 12px; background: var(--bg-card); border-top: 1px solid rgba(0,0,0,0.05); display: flex; gap: 10px; max-width: 800px; margin: 0 auto; width: 100%; }
+        .chat-input { flex: 1; padding: 12px; border-radius: 24px; border: 1px solid #ddd; background: var(--bg-app); color: var(--text-main); }
+        .profile-header { width: 100%; height: 300px; }
+        .profile-header img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-body { padding: 24px; background: var(--bg-card); border-top-left-radius: 30px; border-top-right-radius: 30px; margin-top: -30px; position: relative; z-index: 2; }
+        .trait-tag { display: inline-block; padding: 4px 8px; background: var(--primary-light); color: var(--primary); border-radius: 6px; font-size: 0.8rem; margin-right: 4px; margin-bottom: 4px; }
+        .settings-list, .filter-container { padding: 20px; display: flex; flex-direction: column; gap: 16px; max-width: 600px; margin: 0 auto; width: 100%; }
+        .setting-item { background: var(--bg-card); padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .theme-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .theme-dot { width: 100%; aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; }
+        .theme-dot.active { border-color: var(--text-main); transform: scale(1.1); }
+        .toggle { width: 48px; height: 26px; background: #e2e8f0; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
+        .toggle.on { background: var(--primary); }
+        .toggle::after { content:''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: 0.3s; }
+        .toggle.on::after { left: 25px; }
+        .filter-group { background: var(--bg-card); padding: 16px; border-radius: 16px; }
+        .range-inputs { display: flex; gap: 10px; margin-top: 10px; }
+        .range-inputs input { width: 50%; padding: 8px; border-radius: 8px; border: 1px solid var(--primary-light); background: var(--bg-app); color: var(--text-main); }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .chip { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--primary-light); cursor: pointer; transition: 0.2s; color: var(--text-sec); }
+        .chip.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .nav-bar { position: absolute; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid rgba(0,0,0,0.05); padding: 10px 0 20px; display: flex; justify-content: space-around; z-index: 30; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-sec); font-size: 0.7rem; font-weight: 600; cursor: pointer; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item span { font-size: 26px; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #1f2937; color: white; padding: 12px 24px; border-radius: 50px; font-weight: 600; transition: 0.4s; z-index: 1000; opacity: 0; white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .back-btn { cursor: pointer; padding: 8px; margin-right: 10px; }
+        .file-label { display: flex; align-items: center; justify-content: center; padding: 14px; background: var(--primary-light); color: var(--primary); border-radius: 12px; cursor: pointer; margin-bottom: 16px; font-weight: 600; transition: 0.2s; }
+        .file-label:active { transform: scale(0.98); }
+        .file-label span { pointer-events: none; }
+        
+        /* Modal for Delete Account */
+        .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .modal-content { background: var(--bg-card); padding: 24px; border-radius: 20px; width: 90%; max-width: 320px; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Главная -->
-        <div id="page-home" class="page active">
-            <div class="header">
-                <div class="header-btn" onclick="showPage('favorites')">❤️</div>
-                <div class="logo">🐾 PetMatch</div>
-                <div class="header-btn" onclick="showPage('add')">➕</div>
-            </div>
 
-            <div class="filters">
-                <button class="filter-btn active" onclick="setFilter('all')">Все</button>
-                <button class="filter-btn" onclick="setFilter('Кот')">Коты</button>
-                <button class="filter-btn" onclick="setFilter('Собака')">Собаки</button>
-            </div>
-
-            <div class="card-container" id="card-container"></div>
-
-            <div class="actions" id="actions">
-                <button class="action-btn dislike-btn" onclick="swipe('left')">✕</button>
-                <button class="action-btn like-btn" onclick="swipe('right')">❤️</button>
-            </div>
+<div class="app-wrapper">
+    <header id="main-header" style="display:none;">
+        <div class="logo"><span class="material-icons-round">pets</span> PetMatch</div>
+        <div style="display:flex; gap:10px;">
+            <div class="icon-btn" onclick="goTo('my-pets')"><span class="material-icons-round">person</span></div>
+            <div class="icon-btn" onclick="goTo('settings')"><span class="material-icons-round">settings</span></div>
         </div>
+    </header>
 
-        <!-- Избранное -->
-        <div id="page-favorites" class="page">
-            <div class="header">
-                <div class="header-btn" onclick="showPage('home')">←</div>
-                <div class="logo">Избранное</div>
-                <div style="width: 40px;"></div>
-            </div>
-            <div class="favorites-list" id="favorites-list"></div>
-        </div>
-
-        <!-- Чат -->
-        <div id="page-chat" class="page">
-            <div class="chat-header">
-                <div class="header-btn" onclick="showPage('favorites')">←</div>
-                <img id="chat-avatar" src="" alt="" class="chat-avatar">
-                <div class="chat-user">
-                    <div class="chat-name" id="chat-name"></div>
-                    <div class="chat-status" id="chat-status">в сети</div>
+    <main>
+        <!-- AUTH SCREEN -->
+        <div id="auth-screen" class="screen active auth-screen">
+            <div class="auth-card">
+                <div style="font-size: 4rem; margin-bottom: 10px;">🐾</div>
+                <h2 id="auth-title">Вход</h2>
+                <p style="color:var(--text-sec); margin-bottom: 20px;">Вход обязателен</p>
+                <input type="text" id="reg-name" class="auth-input" placeholder="Ваше Имя" style="display:none;">
+                <input type="text" id="auth-login" class="auth-input" placeholder="Email / Логин">
+                <input type="password" id="auth-pass" class="auth-input" placeholder="Пароль">
+                <button class="auth-btn" onclick="handleAuth()">Войти</button>
+                <div class="icon-btn" style="margin:15px auto 0; width:fit-content; color:var(--primary);" onclick="toggleAuthMode()">
+                    <span id="auth-toggle-text">Нет аккаунта?</span>
                 </div>
             </div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="message message-other">
-                    Привет! 👋 Я хозяин этого питомца. Он очень ждёт новый дом!
-                    <div class="message-time">10:30</div>
+        </div>
+
+        <!-- FEED -->
+        <div id="feed" class="screen">
+            <div class="feed-container"><div class="card-stack" id="stack"></div></div>
+            <div class="controls">
+                <button class="btn-act btn-pass" onclick="swipe('left')"><span class="material-icons-round">close</span></button>
+                <button class="btn-act btn-info" onclick="openProfile(currentPet)"><span class="material-icons-round">info</span></button>
+                <button class="btn-act btn-like" onclick="swipe('right')"><span class="material-icons-round">favorite</span></button>
+            </div>
+        </div>
+
+        <!-- FILTER SCREEN -->
+        <div id="filter-screen" class="screen">
+            <div style="padding:16px 20px; background:var(--bg-card); border-bottom:1px solid rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center;"><span class="material-icons-round back-btn" onclick="goTo('feed')">arrow_back</span><h2>Фильтр поиска</h2></div>
+                <div class="icon-btn" onclick="resetFilters()" style="color:var(--danger); font-size:0.8rem; font-weight:600;">Сбросить</div>
+            </div>
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label class="form-label">Имя питомца</label>
+                    <input type="text" id="filter-name" class="form-control" placeholder="Введите имя...">
                 </div>
-            </div>
-            <div class="chat-input-container">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Написать сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
-                <button class="send-btn" onclick="sendMessage()">➤</button>
+                <div class="filter-group">
+                    <label class="form-label">Тип питомца</label>
+                    <div class="chips" id="type-chips"><div class="chip selected" onclick="selectChip(this, 'type', 'cat')">🐱 Кот</div><div class="chip selected" onclick="selectChip(this, 'type', 'dog')">🐶 Собака</div></div>
+                </div>
+                <div class="filter-group">
+                    <label class="form-label">Возраст (лет)</label>
+                    <div class="range-inputs"><input type="number" id="min-age" placeholder="От" min="0"><input type="number" id="max-age" placeholder="До" min="0"></div>
+                </div>
+                <div class="filter-group">
+                    <label class="form-label">Характер</label>
+                    <div class="chips" id="trait-chips">
+                        <div class="chip" onclick="toggleChip(this)">Игривый</div><div class="chip" onclick="toggleChip(this)">Спокойный</div><div class="chip" onclick="toggleChip(this)">Ласковый</div>
+                        <div class="chip" onclick="toggleChip(this)">Для квартиры</div><div class="chip" onclick="toggleChip(this)">Для дома</div><div class="chip" onclick="toggleChip(this)">С детьми</div>
+                    </div>
+                </div>
+                <button class="auth-btn" onclick="applyFilters()">Применить фильтры</button>
             </div>
         </div>
 
-        <!-- Страница питомца -->
-        <div id="page-pet" class="page">
-            <div class="header">
-                <div class="header-btn" onclick="showPage('home')">←</div>
-                <div class="logo">Профиль</div>
-                <div style="width: 40px;"></div>
+        <!-- FAVORITES -->
+        <div id="favs" class="screen">
+            <div style="padding:16px 20px; background:var(--bg-card); border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center;">
+                <span class="material-icons-round back-btn" onclick="goTo('feed')">arrow_back</span><h2>❤️ Избранное</h2>
             </div>
-            <div class="pet-detail" id="pet-detail-content"></div>
+            <div class="content-grid grid-2" id="fav-list"></div>
         </div>
 
-        <!-- Добавление -->
-        <div id="page-add" class="page">
-            <div class="header">
-                <div class="header-btn" onclick="showPage('home')">←</div>
-                <div class="logo">Новый питомец</div>
-                <div style="width: 40px;"></div>
+        <!-- ADD PET -->
+        <div id="add-screen" class="screen">
+            <div style="padding:16px 20px; background:var(--bg-card); border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center;">
+                <span class="material-icons-round back-btn" onclick="goTo('feed')">arrow_back</span><h2>Добавить питомца</h2>
             </div>
-            <div class="form-container">
-                <form onsubmit="addPet(event)">
-                    <div class="form-group">
-                        <label class="form-label">Имя питомца</label>
-                        <input type="text" class="form-input" id="pet-name-input" placeholder="Например, Барсик" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Возраст</label>
-                        <input type="text" class="form-input" id="pet-age-input" placeholder="Например, 2 года" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Порода</label>
-                        <input type="text" class="form-input" id="pet-breed-input" placeholder="Например, Дворняга" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Тип</label>
-                        <select class="form-select" id="pet-type-input">
-                            <option value="Кот">Кот</option>
-                            <option value="Собака">Собака</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Описание</label>
-                        <textarea class="form-textarea" id="pet-desc-input" placeholder="Расскажите о характере..." required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Ваше имя</label>
-                        <input type="text" class="form-input" id="owner-input" placeholder="Ваше имя" required>
-                    </div>
-                    <button type="submit" class="btn-primary">Добавить питомца 🐾</button>
-                </form>
+            <div style="padding:20px; max-width:600px; margin:0 auto; width:100%;">
+                <div class="form-group">
+                    <label class="file-label" for="new-img-file">📷 <span>Выбрать фото из галереи</span></label>
+                    <input type="file" id="new-img-file" accept="image/*" style="display:none;">
+                </div>
+                <div class="form-group"><label class="form-label">Имя</label><input type="text" id="new-name" class="form-control"></div>
+                <div class="form-group"><label class="form-label">Возраст</label><input type="number" id="new-age" class="form-control"></div>
+                <div class="form-group"><label class="form-label">Порода</label><input type="text" id="new-breed" class="form-control"></div>
+                <div class="form-group"><label class="form-label">Тип</label>
+                    <select id="new-type" class="form-control"><option value="cat">Кот</option><option value="dog">Собака</option></select>
+                </div>
+                <div class="form-group"><label class="form-label">Описание</label><textarea id="new-bio" class="form-control" rows="3"></textarea></div>
+                <button class="auth-btn" onclick="addPet()">Опубликовать</button>
             </div>
         </div>
 
-        <!-- Навигация -->
-        <div class="nav" id="bottom-nav">
-            <div class="nav-item active" onclick="showPage('home')">
-                <span class="nav-icon">🏠</span>
-                <span>Главная</span>
+        <!-- MY PETS -->
+        <div id="my-pets" class="screen">
+            <div style="padding:16px 20px; background:var(--bg-card); border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center;">
+                <span class="material-icons-round back-btn" onclick="goTo('feed')">arrow_back</span><h2>Мои питомцы</h2>
             </div>
-            <div class="nav-item" onclick="showPage('favorites')">
-                <span class="nav-icon">❤️</span>
-                <span>Избранное</span>
+            <div class="content-grid grid-2" id="my-pets-list"></div>
+        </div>
+
+        <!-- CHAT -->
+        <div id="chat-screen" class="screen">
+            <div style="padding:12px 20px; background:var(--bg-card); border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center;">
+                <span class="material-icons-round back-btn" onclick="goTo('favs')">arrow_back</span>
+                <img id="chat-avatar" src="" style="width:36px; height:36px; border-radius:50%; margin-right:10px;">
+                <div><b id="chat-owner">Владелец</b><div style="font-size:0.75rem; color:var(--success);">Онлайн</div></div>
             </div>
-            <div class="nav-item" onclick="showPage('add')">
-                <span class="nav-icon">➕</span>
-                <span>Добавить</span>
+            <div class="chat-area" id="chat-messages"></div>
+            <div class="chat-bar">
+                <input type="text" id="msg-input" class="chat-input" placeholder="Написать...">
+                <button class="fav-btn" style="padding:0 14px;" onclick="sendMessage()"><span class="material-icons-round">send</span></button>
+            </div>
+        </div>
+
+        <!-- PROFILE -->
+        <div id="profile-screen" class="screen" style="padding:0;">
+            <div style="position:absolute; top:10px; left:10px; z-index:10;">
+                <span class="material-icons-round back-btn" style="background:rgba(255,255,255,0.8); padding:6px; border-radius:50%;" onclick="goTo('feed')">arrow_back</span>
+            </div>
+            <div class="profile-header"><img id="prof-img" src=""></div>
+            <div class="profile-body">
+                <div style="display:flex; justify-content:space-between; align-items:center;"><h2 id="prof-name">Имя</h2><span id="prof-age" style="background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:8px; font-weight:700;"></span></div>
+                <div id="prof-breed" style="color:var(--text-sec); margin:5px 0 15px;"></div>
+                <div id="prof-traits" style="margin-bottom:15px;"></div>
+                <p id="prof-bio" style="line-height:1.6; margin-bottom:20px;"></p>
+                <div style="background:var(--bg-app); padding:16px; border-radius:16px; display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                    <div style="width:40px; height:40px; background:var(--primary-light); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:bold;">В</div>
+                    <div><b>Владелец</b><br><span style="font-size:0.85rem; color:var(--success);">Рейтинг 5.0 ★</span></div>
+                </div>
+                <button class="auth-btn" id="prof-chat-btn">Написать владельцу</button>
+            </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="settings" class="screen">
+            <div style="padding:16px 20px; background:var(--bg-card); border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center;">
+                <span class="material-icons-round back-btn" onclick="goTo('feed')">arrow_back</span><h2>Настройки</h2>
+            </div>
+            <div class="settings-list">
+                <div class="setting-item"><span>PC Режим (Широкий экран)</span><div class="toggle" id="wide-toggle" onclick="toggleWideMode()"></div></div>
+                <div class="setting-item"><div><b>Уведомления</b><div style="font-size:0.8rem; color:var(--text-sec);">Всплывающие оповещения</div></div><div class="toggle on" id="notif-toggle" onclick="this.classList.toggle('on')"></div></div>
+                <div class="setting-item" style="display:block;">
+                    <b>Тема оформления</b>
+                    <div class="theme-selector">
+                        <div class="theme-dot" style="background:#f4f5f7; border:1px solid #ddd;" onclick="setTheme('light')"></div>
+                        <div class="theme-dot" style="background:#0f172a;" onclick="setTheme('dark')"></div>
+                        <div class="theme-dot" style="background:#fdf2f8;" onclick="setTheme('pink')"></div>
+                        <div class="theme-dot" style="background:#eff6ff;" onclick="setTheme('indigo')"></div>
+                    </div>
+                </div>
+                <button class="auth-btn" style="background:var(--danger);" onclick="confirmLogout()">Выйти из аккаунта</button>
+                <button class="auth-btn" style="background:var(--text-sec);" onclick="showDeleteAccountModal()">Удалить аккаунт</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="nav-bar" id="nav-bar" style="display:none;">
+        <div class="nav-item active" onclick="goTo('feed')"><span class="material-icons-round">local_fire_department</span>Поиск</div>
+        <div class="nav-item" onclick="openFilterScreen()"><span class="material-icons-round">tune</span>Фильтры</div>
+        <div class="nav-item" onclick="goTo('favs')"><span class="material-icons-round">favorite</span>Лайки</div>
+        <div class="nav-item" onclick="goTo('add-screen')"><span class="material-icons-round">add_circle</span>Добавить</div>
+    </nav>
+    <div id="toast" class="toast"></div>
+
+    <!-- DELETE ACCOUNT MODAL -->
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-bottom:15px;">Удалить аккаунт?</h3>
+            <p style="color:var(--text-sec); margin-bottom:15px; font-size:0.9rem;">Для подтверждения введите Логин, Пароль и Код с почты.</p>
+            <input type="text" id="del-login" class="auth-input" placeholder="Ваш Логин">
+            <input type="password" id="del-pass" class="auth-input" placeholder="Пароль">
+            <input type="text" id="del-code" class="auth-input" placeholder="Код из почты (Demo: 1234)">
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="auth-btn" style="background:var(--danger);" onclick="confirmDeleteAccount()">Удалить</button>
+                <button class="auth-btn" style="background:var(--text-sec);" onclick="document.getElementById('delete-modal').style.display='none'">Отмена</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-// Данные питомцев
-const petsData = [
-  {
-    id: 1,
-    name: "Барсик",
-    age: "2 года",
-    breed: "Дворняга",
-    type: "Кот",
-    description: "Ласковый и игривый котик. Обожает мурлыкать и спать на коленях. Приучен к лотку.",
-    image: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600&h=800&fit=crop",
-    owner: "Анна"
-  },
-  {
-    id: 2,
-    name: "Рекс",
-    age: "1.5 года",
-    breed: "Немецкая овчарка",
-    type: "Собака",
-    description: "Верный друг и защитник. Очень умный, знает команды. Любит бегать и играть с мячом.",
-    image: "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=600&h=800&fit=crop",
-    owner: "Максим"
-  },
-  {
-    id: 3,
-    name: "Мурка",
-    age: "8 месяцев",
-    breed: "Шотландская",
-    type: "Кот",
-    description: "Маленькая пушистая красавица. Очень ласковая, любит сидеть на ручках. Ищет теплый дом.",
-    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&h=800&fit=crop",
-    owner: "Ольга"
-  },
-  {
-    id: 4,
-    name: "Шарик",
-    age: "3 года",
-    breed: "Лабрадор",
-    type: "Собака",
-    description: "Добрейшая душа! Обожает детей и взрослых. Всегда готов к прогулке и играм.",
-    image: "https://images.unsplash.com/photo-1591769225440-811ad7d6eca6?w=600&h=800&fit=crop",
-    owner: "Иван"
-  },
-  {
-    id: 5,
-    name: "Снежок",
-    age: "1 год",
-    breed: "Персидская",
-    type: "Кот",
-    description: "Белоснежный красавец с голубыми глазами. Спокойный, любит тишину и уют.",
-    image: "https://images.unsplash.com/photo-1513245543132-31f507417b26?w=600&h=800&fit=crop",
-    owner: "Елена"
-  },
-  {
-    id: 6,
-    name: "Тузик",
-    age: "2.5 года",
-    breed: "Джек-рассел",
-    type: "Собака",
-    description: "Энергичный малыш! Полон жизни и радости. Нужен активный хозяин.",
-    image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&h=800&fit=crop",
-    owner: "Дмитрий"
-  },
-  {
-    id: 7,
-    name: "Луна",
-    age: "6 месяцев",
-    breed: "Русская голубая",
-    type: "Кот",
-    description: "Нежная и тихая кошечка. Любит смотреть в окно и мурлыкать. Идеальный компаньон.",
-    image: "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=600&h=800&fit=crop",
-    owner: "Мария"
-  },
-  {
-    id: 8,
-    name: "Бобик",
-    age: "4 года",
-    breed: "Бигль",
-    type: "Собака",
-    description: "Очаровательный обжора! Любит вкусно поесть и гулять. Дружит со всеми.",
-    image: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=600&h=800&fit=crop",
-    owner: "Алексей"
-  },
-  {
-    id: 9,
-    name: "Масяня",
-    age: "1 год",
-    breed: "Мейн-кун",
-    type: "Кот",
-    description: "Большая и пушистая красавица! Характер спокойный, любит обнимашки.",
-    image: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=600&h=800&fit=crop",
-    owner: "Наталья"
-  },
-  {
-    id: 10,
-    name: "Граф",
-    age: "3.5 года",
-    breed: "Доберман",
-    type: "Собака",
-    description: "Благородный и умный. Отличный охранник и друг. Нужен опытный хозяин.",
-    image: "https://images.unsplash.com/photo-1568572933382-74d440642117?w=600&h=800&fit=crop",
-    owner: "Сергей"
-  }
-];
+<script>
+    // 🔥 FIREBASE CONFIG (Ваши ключи)
+    const firebaseConfig = {
+        apiKey: "AIzaSyBSD6MuSXYKTrT0FuEr-dn7wVYZkjWU4sc",
+        authDomain: "petmatch-2d396.firebaseapp.com",
+        databaseURL: "https://petmatch-2d396-default-rtdb.firebaseio.com",
+        projectId: "petmatch-2d396",
+        storageBucket: "petmatch-2d396.firebasestorage.app",
+        messagingSenderId: "660491830051",
+        appId: "1:660491830051:web:ca24ef3a95075fb00c0296",
+        measurementId: "G-2951H1CGH4"
+    };
 
-// Состояние
-let pets = [...petsData];
-let currentFilter = 'all';
-let currentIndex = 0;
-let likedPets = [];
-let messages = {};
-let currentChatPet = null;
-let isDragging = false;
-let startX = 0;
-let currentCard = null;
+    // Инициализация Firebase
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-// Инициализация
-document.addEventListener('DOMContentLoaded', () => {
-  renderCard();
-  updateFavorites();
-});
+    let allPets = [];
+    let favorites = []; // Сохраняются в LocalStorage под UID пользователя
+    let chats = JSON.parse(localStorage.getItem('pm_chats') || '{}');
+    let currentUser = null;
+    let displayPets = [];
+    let currentIdx = 0;
+    let currentPet = null;
+    let activeChatId = null;
+    let isRegMode = false;
+    let filters = { name: '', types: ['cat', 'dog'], minAge: 0, maxAge: 100, traits: [] };
 
-function getFilteredPets() {
-  if (currentFilter === 'all') return pets;
-  return pets.filter(p => p.type === currentFilter);
-}
+    if ("Notification" in window) Notification.requestPermission();
 
-function getCurrentPet() {
-  const filtered = getFilteredPets();
-  return filtered[currentIndex] || null;
-}
-
-function renderCard() {
-  const container = document.getElementById('card-container');
-  const actions = document.getElementById('actions');
-  const pet = getCurrentPet();
-
-  if (!pet) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🎉</div>
-        <div class="empty-title">Все просмотрены!</div>
-        <div class="empty-text">Вы посмотрели всех питомцев</div>
-        <button class="btn-primary" onclick="resetApp()">Начать заново</button>
-      </div>
-    `;
-    actions.style.display = 'none';
-    return;
-  }
-
-  actions.style.display = 'flex';
-
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = `
-    <div class="stamp stamp-like">ЛАЙК</div>
-    <div class="stamp stamp-nope">НЕТ</div>
-    <img src="${pet.image}" alt="${pet.name}" class="card-image" onclick="openPetDetail(${JSON.stringify(pet).replace(/"/g, '&quot;')})">
-    <div class="card-gradient" onclick="openPetDetail(${JSON.stringify(pet).replace(/"/g, '&quot;')})"></div>
-    <div class="card-info" onclick="openPetDetail(${JSON.stringify(pet).replace(/"/g, '&quot;')})">
-      <div class="pet-name">${pet.name}</div>
-      <div class="pet-meta">${pet.breed} • ${pet.age}</div>
-      <div class="pet-desc">${pet.description}</div>
-    </div>
-  `;
-
-  card.addEventListener('mousedown', handleDragStart);
-  card.addEventListener('touchstart', handleDragStart, {passive: true});
-
-  container.innerHTML = '';
-  container.appendChild(card);
-  currentCard = card;
-}
-
-function handleDragStart(e) {
-  if (!currentCard) return;
-  isDragging = true;
-  startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-  currentCard.style.transition = 'none';
-
-  document.addEventListener('mousemove', handleDragMove);
-  document.addEventListener('touchmove', handleDragMove, {passive: true});
-  document.addEventListener('mouseup', handleDragEnd);
-  document.addEventListener('touchend', handleDragEnd);
-}
-
-function handleDragMove(e) {
-  if (!isDragging || !currentCard) return;
-  const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-  const deltaX = x - startX;
-  const rotate = deltaX / 15;
-
-  currentCard.style.transform = `translateX(${deltaX}px) rotate(${rotate}deg)`;
-
-  if (deltaX > 50) {
-    currentCard.classList.add('show-like');
-    currentCard.classList.remove('show-nope');
-  } else if (deltaX < -50) {
-    currentCard.classList.add('show-nope');
-    currentCard.classList.remove('show-like');
-  } else {
-    currentCard.classList.remove('show-like', 'show-nope');
-  }
-}
-
-function handleDragEnd(e) {
-  if (!isDragging || !currentCard) return;
-  isDragging = false;
-
-  const x = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
-  const deltaX = x - startX;
-
-  document.removeEventListener('mousemove', handleDragMove);
-  document.removeEventListener('touchmove', handleDragMove);
-  document.removeEventListener('mouseup', handleDragEnd);
-  document.removeEventListener('touchend', handleDragEnd);
-
-  if (Math.abs(deltaX) > 100) {
-    swipe(deltaX > 0 ? 'right' : 'left');
-  } else {
-    currentCard.style.transition = 'transform 0.3s ease';
-    currentCard.style.transform = 'translateX(0) rotate(0)';
-    currentCard.classList.remove('show-like', 'show-nope');
-  }
-}
-
-function swipe(direction) {
-  const pet = getCurrentPet();
-  if (!pet || !currentCard) return;
-
-  currentCard.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-
-  if (direction === 'right') {
-    currentCard.style.transform = 'translateX(150%) rotate(30deg)';
-    currentCard.style.opacity = '0';
-
-    // Добавляем в избранное сразу
-    if (!likedPets.find(p => p.id === pet.id)) {
-      likedPets.push(pet);
-    }
-    updateFavorites();
-  } else {
-    currentCard.style.transform = 'translateX(-150%) rotate(-30deg)';
-    currentCard.style.opacity = '0';
-  }
-
-  setTimeout(() => {
-    currentIndex++;
-    renderCard();
-  }, 400);
-}
-
-function setFilter(filter) {
-  currentFilter = filter;
-  currentIndex = 0;
-
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.textContent === (filter === 'all' ? 'Все' : filter === 'Кот' ? 'Коты' : 'Собаки')) {
-      btn.classList.add('active');
-    }
-  });
-
-  renderCard();
-}
-
-function showPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${page}`).classList.add('active');
-
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (page === 'home' || page === 'favorites' || page === 'add') {
-    document.querySelectorAll('.nav-item').forEach((n, i) => {
-      if ((page === 'home' && i === 0) || (page === 'favorites' && i === 1) || (page === 'add' && i === 2)) {
-        n.classList.add('active');
-      }
+    // Auth State Listener
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('auth-screen').classList.remove('active');
+            document.getElementById('feed').classList.add('active');
+            document.getElementById('main-header').style.display = 'flex';
+            document.getElementById('nav-bar').style.display = 'flex';
+            loadPets(); // Загружаем всех питомцев из базы
+            if(localStorage.getItem('pm_wide')==='true') { document.body.classList.add('wide-mode'); document.getElementById('wide-toggle').classList.add('on'); }
+        } else {
+            currentUser = null;
+        }
     });
-  }
 
-  if (page === 'favorites') updateFavorites();
-}
+    // Auth Logic (Login/Pass)
+    function toggleAuthMode() {
+        isRegMode = !isRegMode;
+        document.getElementById('auth-title').innerText = isRegMode ? 'Регистрация' : 'Вход';
+        document.querySelector('.auth-btn').innerText = isRegMode ? 'Зарегистрироваться' : 'Войти';
+        document.getElementById('reg-name').style.display = isRegMode ? 'block' : 'none';
+        document.getElementById('auth-toggle-text').innerText = isRegMode ? 'Уже есть аккаунт?' : 'Нет аккаунта?';
+    }
 
-function updateFavorites() {
-  const list = document.getElementById('favorites-list');
+    async function handleAuth() {
+        let loginInput = document.getElementById('auth-login').value.trim();
+        let passInput = document.getElementById('auth-pass').value;
+        let nameInput = document.getElementById('reg-name').value.trim();
+        
+        if(!loginInput || !passInput) return showToast('Заполните поля');
 
-  if (likedPets.length === 0) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">💔</div>
-        <div class="empty-title">Пока нет избранного</div>
-        <div class="empty-text">Свайпайте вправо, чтобы добавить!</div>
-      </div>
-    `;
-    return;
-  }
+        // Конвертация логина в email для Firebase
+        let authEmail = loginInput;
+        if (!loginInput.includes('@')) {
+            authEmail = loginInput.toLowerCase().replace(/[^a-z0-9]/g, '') + '@petmatch.local';
+        }
 
-  list.innerHTML = likedPets.map(pet => `
-    <div class="favorite-item" onclick="openChat(${JSON.stringify(pet).replace(/"/g, '&quot;')})">
-      <img src="${pet.image}" alt="${pet.name}" class="favorite-avatar">
-      <div class="favorite-info">
-        <div class="favorite-name">${pet.name}</div>
-        <div class="favorite-status">Нажмите, чтобы написать...</div>
-      </div>
-      💬
-    </div>
-  `).join('');
-}
+        try {
+            if (isRegMode) {
+                await auth.createUserWithEmailAndPassword(authEmail, passInput);
+                if(nameInput) await auth.currentUser.updateProfile({ displayName: nameInput });
+                showToast('Регистрация успешна!');
+            } else {
+                await auth.signInWithEmailAndPassword(authEmail, passInput);
+            }
+        } catch (err) {
+            let msg = err.message.replace('Firebase: ', '').replace('auth/', '');
+            if(msg.includes('email-already-in-use')) msg = 'Логин занят';
+            if(msg.includes('user-not-found') || msg.includes('wrong-password')) msg = 'Неверный логин или пароль';
+            showToast(msg);
+        }
+    }
 
-function openChat(pet) {
-  currentChatPet = typeof pet === 'string' ? JSON.parse(pet) : pet;
-  document.getElementById('chat-avatar').src = currentChatPet.image;
-  document.getElementById('chat-name').textContent = currentChatPet.owner;
+    function confirmLogout() {
+        if(confirm("Вы точно хотите выйти из аккаунта?")) {
+            auth.signOut();
+            location.reload();
+        }
+    }
 
-  const chatMessages = messages[currentChatPet.id] || [];
-  const container = document.getElementById('chat-messages');
-  container.innerHTML = `
-    <div class="message message-other">
-      Привет! 👋 Я хозяин ${currentChatPet.name}. Он очень ждёт новый дом!
-      <div class="message-time">10:30</div>
-    </div>
-  `;
+    function showDeleteAccountModal() {
+        document.getElementById('delete-modal').style.display = 'flex';
+    }
 
-  chatMessages.forEach(msg => {
-    container.innerHTML += `
-      <div class="message ${msg.own ? 'message-own' : 'message-other'}">
-        ${msg.text}
-        <div class="message-time">${msg.time}</div>
-      </div>
-    `;
-  });
+    async function confirmDeleteAccount() {
+        const login = document.getElementById('del-login').value.trim();
+        const pass = document.getElementById('del-pass').value;
+        const code = document.getElementById('del-code').value;
 
-  container.scrollTop = container.scrollHeight;
-  showPage('chat');
-}
+        // Демо-проверка кода
+        if (code !== '1234') return showToast('Неверный код (Для демо введите 1234)');
+        
+        let authEmail = login;
+        if (!login.includes('@')) authEmail = login.toLowerCase().replace(/[^a-z0-9]/g, '') + '@petmatch.local';
 
-function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text || !currentChatPet) return;
+        if (currentUser && currentUser.email !== authEmail) return showToast('Логин не совпадает');
 
-  const time = new Date().toLocaleTimeString('ru', {hour: '2-digit', minute:'2-digit'});
+        if(confirm("Это действие необратимо. Удалить аккаунт?")) {
+            try {
+                // Удаление аккаунта (требуется повторный вход в реальном Firebase, здесь демо)
+                showToast('Аккаунт удален (Демо режим)');
+                setTimeout(() => { auth.signOut(); location.reload(); }, 1000);
+            } catch (e) {
+                showToast(e.message);
+            }
+        }
+    }
 
-  if (!messages[currentChatPet.id]) messages[currentChatPet.id] = [];
-  messages[currentChatPet.id].push({text, own: true, time});
+    // Pets Loading (FIREBASE)
+    async function loadPets() {
+        try {
+            // Читаем из Firestore
+            const snapshot = await db.collection('pets').orderBy('createdAt', 'desc').limit(100).get();
+            allPets = [];
+            snapshot.forEach(doc => allPets.push({ id: doc.id, ...doc.data() }));
+            
+            if (allPets.length === 0) seedTestPets(); // Если база пуста, тестовые данные
+            
+            // Загружаем избранное конкретного пользователя
+            favorites = JSON.parse(localStorage.getItem(`pm_favs_${currentUser.uid}`) || '[]');
+            
+            displayPets = [...allPets];
+            renderCard();
+        } catch(e) { 
+            showToast('Ошибка загрузки данных'); 
+        }
+    }
 
-  const container = document.getElementById('chat-messages');
-  container.innerHTML += `
-    <div class="message message-own">
-      ${text}
-      <div class="message-time">${time}</div>
-    </div>
-  `;
+    function seedTestPets() {
+        const traitsPool = ['Игривый', 'Ласковый', 'Спокойный', 'Для квартиры', 'Для дома', 'С детьми'];
+        const breeds = ['Корги', 'Британец', 'Хаски', 'Мейн-кун', 'Лабрадор', 'Сфинкс'];
+        const names = ['Рекс', 'Мася', 'Бобик', 'Соня', 'Рыжик', 'Тузик'];
+        allPets = Array.from({ length: 20 }, (_, i) => ({
+            id: 'test_' + i, name: names[i % names.length], age: i % 8,
+            breed: breeds[i % breeds.length], type: i % 2 === 0 ? 'dog' : 'cat',
+            bio: 'Ищет любящую семью.', owner: 'TestOwner', ownerId: 'test',
+            img: `https://images.unsplash.com/photo-${i%2===0 ? '1543466835-00a7907e9de1' : '1514888286974-6c03e2ca1dba'}?w=500&sig=${i}`,
+            traits: [traitsPool[i%3], traitsPool[(i+1)%6]],
+            createdAt: firebase.firestore.Timestamp.now()
+        }));
+        displayPets = [...allPets];
+        renderCard();
+    }
 
-  input.value = '';
-  container.scrollTop = container.scrollHeight;
+    // Feed Rendering
+    function renderCard() {
+        const s = document.getElementById('stack'); s.innerHTML = '';
+        const controls = document.querySelector('.controls');
+        if(!displayPets.length || currentIdx >= displayPets.length) {
+            const isFiltered = filters.name || filters.minAge > 0 || filters.maxAge < 100 || filters.traits.length > 0;
+            s.innerHTML = isFiltered ? '<div style="text-align:center; padding-top:100px;"><h3>Нет питомцев по таким критериям 🐾</h3></div>' : '<div style="text-align:center; padding-top:100px;"><h3>Все питомцы закончились 🐾</h3></div>';
+            controls.style.display = 'none'; return;
+        }
+        controls.style.display = 'flex';
+        const p = displayPets[currentIdx]; currentPet = p;
+        const c = document.createElement('div'); c.className = 'pet-card';
+        c.innerHTML = `
+            <img src="${p.img}" class="pet-img" onerror="this.src='https://placehold.co/400x400?text=Pet'">
+            <div class="pet-info">
+                <div style="display:flex; justify-content:space-between;"><span class="pet-name">${p.name}</span><span class="pet-meta">${p.breed}</span></div>
+                <div style="color:var(--text-sec); margin-top:4px;">${p.age === 0 ? '1 мес' : p.age + ' г.'} • ${p.type==='cat'?'Кот':'Собака'}</div>
+            </div>
+        `;
+        s.appendChild(c); initSwipe(c);
+    }
 
-  // Имитация ответа владельца
-  setTimeout(() => {
-    const replyTime = new Date().toLocaleTimeString('ru', {hour: '2-digit', minute:'2-digit'});
-    const reply = `Привет! Да, ${currentChatPet.name} ещё ищет дом. Когда сможете приехать познакомиться?`;
+    function initSwipe(el) {
+        let sx, cx, drag = false;
+        const move = x => { if(!drag)return; cx=x-sx; el.style.transform = `translateX(${cx}px) rotate(${cx/20}deg)`; };
+        const end = () => { drag=false; if(Math.abs(cx)>100) swipe(cx>0?'right':'left'); else { el.style.transform=''; } };
+        el.addEventListener('mousedown', e=>{drag=true;sx=e.clientX;}); document.addEventListener('mousemove', e=>move(e.clientX)); document.addEventListener('mouseup', end);
+        el.addEventListener('touchstart', e=>{drag=true;sx=e.touches[0].clientX;}); document.addEventListener('touchmove', e=>move(e.touches[0].clientX)); document.addEventListener('touchend', end);
+    }
 
-    messages[currentChatPet.id].push({text: reply, own: false, time: replyTime});
+    async function swipe(dir) {
+        const el = document.querySelector('.pet-card'); if(!el) return;
+        el.style.transition = '0.5s'; el.style.transform = `translateX(${dir==='right'?1000:-1000}px) rotate(${dir==='right'?30:-30}deg)`;
+        if(dir==='right') {
+            favorites.push(currentPet);
+            localStorage.setItem(`pm_favs_${currentUser.uid}`, JSON.stringify(favorites));
+            if("Notification" in window && Notification.permission === "granted") new Notification(`Новый лайк! ❤️ ${currentPet.name}`);
+            showToast('❤️ В избранном');
+        }
+        setTimeout(()=>{currentIdx++; renderCard();}, 300);
+    }
 
-    container.innerHTML += `
-      <div class="message message-other">
-        ${reply}
-        <div class="message-time">${replyTime}</div>
-      </div>
-    `;
-    container.scrollTop = container.scrollHeight;
-  }, 2000);
-}
+    // Filters
+    function toggleChip(el) { el.classList.toggle('selected'); }
+    function selectChip(el, t, v) { el.classList.toggle('selected'); }
 
-function openPetDetail(pet) {
-  currentChatPet = typeof pet === 'string' ? JSON.parse(pet) : pet;
-  const container = document.getElementById('pet-detail-content');
-  const isLiked = likedPets.find(p => p.id === currentChatPet.id);
+    function applyFilters() {
+        filters.name = document.getElementById('filter-name').value.toLowerCase().trim();
+        filters.types = [];
+        document.querySelectorAll('#type-chips .chip.selected').forEach(c => { if(c.innerText.includes('Кот')) filters.types.push('cat'); if(c.innerText.includes('Собака')) filters.types.push('dog'); });
+        if(filters.types.length === 0) filters.types = ['cat', 'dog'];
+        filters.minAge = document.getElementById('min-age').value ? parseInt(document.getElementById('min-age').value) : 0;
+        filters.maxAge = document.getElementById('max-age').value ? parseInt(document.getElementById('max-age').value) : 100;
+        filters.traits = Array.from(document.querySelectorAll('#trait-chips .chip.selected')).map(c => c.innerText);
 
-  container.innerHTML = `
-    <img src="${currentChatPet.image}" alt="${currentChatPet.name}" class="pet-detail-image">
-    <div class="pet-detail-content">
-      <div class="pet-detail-header">
-        <div>
-          <div class="pet-detail-name">${currentChatPet.name}</div>
-          <div class="pet-detail-meta">${currentChatPet.breed} • ${currentChatPet.age}</div>
-        </div>
-      </div>
+        displayPets = allPets.filter(p => {
+            const nameMatch = !filters.name || p.name.toLowerCase().includes(filters.name);
+            const typeMatch = filters.types.includes(p.type);
+            const ageMatch = p.age >= filters.minAge && p.age <= filters.maxAge;
+            const traitMatch = filters.traits.length === 0 || filters.traits.some(t => p.traits && p.traits.includes(t));
+            return nameMatch && typeMatch && ageMatch && traitMatch;
+        });
 
-      <div class="pet-detail-section">
-        <div class="pet-detail-label">О питомце</div>
-        <div class="pet-detail-text">${currentChatPet.description}</div>
-      </div>
+        currentIdx = 0; renderCard(); goTo('feed');
+        showToast(`Найдено: ${displayPets.length} питомцев`);
+    }
 
-      <div class="pet-detail-section">
-        <div class="pet-detail-label">Тип</div>
-        <div class="pet-detail-text">${currentChatPet.type}</div>
-      </div>
+    function resetFilters() {
+        document.getElementById('filter-name').value = '';
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        document.querySelectorAll('#type-chips .chip').forEach(c => c.classList.add('selected'));
+        document.getElementById('min-age').value = ''; document.getElementById('max-age').value = '';
+        
+        filters = { name: '', types: ['cat', 'dog'], minAge: 0, maxAge: 100, traits: [] };
+        displayPets = [...allPets];
+        currentIdx = 0;
+        renderCard();
+        goTo('feed');
+        showToast('Фильтры сброшены');
+    }
 
-      <div class="pet-detail-section">
-        <div class="pet-detail-label">Порода</div>
-        <div class="pet-detail-text">${currentChatPet.breed}</div>
-      </div>
+    // Add Pet with Gallery
+    async function addPet() {
+        const name = document.getElementById('new-name').value;
+        if(!name) return showToast('Введи имя');
+        
+        const t = document.getElementById('new-type').value;
+        const bio = document.getElementById('new-bio').value;
+        const age = document.getElementById('new-age').value;
+        const breed = document.getElementById('new-breed').value;
 
-      <div class="pet-detail-section">
-        <div class="pet-detail-label">Возраст</div>
-        <div class="pet-detail-text">${currentChatPet.age}</div>
-      </div>
+        let imgBase64 = `https://images.unsplash.com/photo-${t==='cat'?'1514888286974-6c03e2ca1dba':'1543466835-00a7907e9de1'}?w=500&sig=${Date.now()}`;
 
-      <div class="pet-detail-owner">
-        <div class="owner-avatar">${currentChatPet.owner.charAt(0)}</div>
-        <div class="owner-info">
-          <div class="owner-name">${currentChatPet.owner}</div>
-          <div class="owner-status">в сети</div>
-        </div>
-        <button class="chat-btn" onclick="openChatFromDetail()">Написать</button>
-      </div>
-    </div>
-  `;
+        const fileInput = document.getElementById('new-img-file');
+        if (fileInput.files && fileInput.files[0]) {
+            try {
+                imgBase64 = await readFileAsBase64(fileInput.files[0]);
+            } catch (e) {
+                console.error("Ошибка чтения файла", e);
+            }
+        }
 
-  showPage('pet');
-}
+        const newPet = {
+            name, age: parseInt(age) || 0,
+            breed, type: t, bio,
+            owner: currentUser.displayName || currentUser.email.split('@')[0],
+            ownerId: currentUser.uid, img: imgBase64,
+            traits: ['Ласковый'], createdAt: firebase.firestore.Timestamp.now()
+        };
+        
+        try {
+            await db.collection('pets').add(newPet);
+            showToast('🎉 Питомец добавлен!');
+            loadPets(); 
+            goTo('feed');
+            // Clear form
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-bio').value = '';
+            document.getElementById('new-img-file').value = '';
+        } catch(e) { showToast('Ошибка добавления'); }
+    }
 
-function openChatFromDetail() {
-  openChat(currentChatPet);
-}
+    function readFileAsBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
 
-function addPet(e) {
-  e.preventDefault();
+    // Favs & Chat
+    function renderFavs() {
+        const l = document.getElementById('fav-list'); l.innerHTML = '';
+        const myFavs = JSON.parse(localStorage.getItem(`pm_favs_${currentUser.uid}`) || '[]');
+        if(!myFavs.length) { l.innerHTML = '<p style="text-align:center; width:100%; grid-column:1/-1; padding:40px; color:var(--text-sec)">Пусто. Лайкайте питомцев!</p>'; return; }
+        myFavs.forEach((p,i) => {
+            l.innerHTML += `<div class="fav-item"><img src="${p.img}" class="fav-img"><div class="fav-info"><b>${p.name}</b><span style="font-size:0.8rem; color:var(--text-sec)">${p.breed}</span>
+            <div style="display:flex; gap:8px; margin-top:5px;"><button class="fav-btn" onclick="openChat('${p.id}')">💬 Чат</button><button class="fav-btn" style="background:var(--danger);" onclick="removeFav(${i})">🗑️</button></div></div></div>`;
+        });
+    }
 
-  const newPet = {
-    id: Date.now(),
-    name: document.getElementById('pet-name-input').value,
-    age: document.getElementById('pet-age-input').value,
-    breed: document.getElementById('pet-breed-input').value,
-    type: document.getElementById('pet-type-input').value,
-    description: document.getElementById('pet-desc-input').value,
-    owner: document.getElementById('owner-input').value,
-    image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&h=800&fit=crop'
-  };
+    function removeFav(idx) {
+        let myFavs = JSON.parse(localStorage.getItem(`pm_favs_${currentUser.uid}`) || '[]');
+        myFavs.splice(idx, 1); localStorage.setItem(`pm_favs_${currentUser.uid}`, JSON.stringify(myFavs)); renderFavs(); showToast('Удалено');
+    }
 
-  pets.unshift(newPet);
-  currentIndex = 0;
+    function openChat(petId) {
+        activeChatId = petId;
+        const p = allPets.find(x => x.id === petId);
+        document.getElementById('chat-owner').innerText = p ? p.owner : 'Владелец';
+        document.getElementById('chat-avatar').src = p ? p.img : '';
+        loadMsgs(); goTo('chat-screen');
+    }
 
-  document.getElementById('pet-name-input').value = '';
-  document.getElementById('pet-age-input').value = '';
-  document.getElementById('pet-breed-input').value = '';
-  document.getElementById('pet-desc-input').value = '';
-  document.getElementById('owner-input').value = '';
+    function loadMsgs() {
+        const b = document.getElementById('chat-messages'); b.innerHTML = '';
+        const msgs = chats[activeChatId] || [];
+        msgs.forEach(m => b.innerHTML += `<div class="msg ${m.from==='me'?'msg-out':'msg-in'}">${m.text}</div>`);
+        b.scrollTop = b.scrollHeight;
+    }
 
-  showPage('home');
-  renderCard();
-}
+    function sendMessage() {
+        const i = document.getElementById('msg-input'); if(!i.value.trim() || !activeChatId) return;
+        if(!chats[activeChatId]) chats[activeChatId] = [];
+        chats[activeChatId].push({from:'me', text:i.value}); i.value=''; loadMsgs();
+        localStorage.setItem('pm_chats', JSON.stringify(chats));
+        setTimeout(()=>{ chats[activeChatId].push({from:'them', text:'Супер!'}); localStorage.setItem('pm_chats', JSON.stringify(chats)); loadMsgs(); }, 1500);
+    }
 
-function resetApp() {
-  currentIndex = 0;
-  likedPets = [];
-  messages = {};
-  renderCard();
-}
+    // Profile & Nav
+    function openProfile(p) {
+        if(!p) return;
+        document.getElementById('prof-img').src=p.img; document.getElementById('prof-name').innerText=p.name;
+        document.getElementById('prof-age').innerText = p.age === 0 ? '1 мес' : p.age + ' г.';
+        document.getElementById('prof-breed').innerText=p.breed; document.getElementById('prof-bio').innerText=p.bio;
+        const tDiv = document.getElementById('prof-traits'); tDiv.innerHTML = '';
+        if(p.traits) p.traits.forEach(t => tDiv.innerHTML += `<span class="trait-tag">${t}</span>`);
+        document.getElementById('prof-chat-btn').onclick = () => openChat(p.id);
+        goTo('profile-screen');
+    }
 
-    </script>
+    function renderMyPets() {
+        const l = document.getElementById('my-pets-list'); l.innerHTML = '';
+        const my = allPets.filter(p => p.ownerId === currentUser.uid);
+        if(!my.length) { l.innerHTML = '<p style="text-align:center; width:100%; grid-column:1/-1; padding:40px; color:var(--text-sec)">Вы еще не добавили питомцев</p>'; return; }
+        my.forEach(p => l.innerHTML += `<div class="fav-item" onclick="openProfile(allPets.find(x=>x.id==='${p.id}'))"><img src="${p.img}" class="fav-img"><div class="fav-info"><b>${p.name}</b><span style="font-size:0.8rem; color:var(--text-sec)">Мой питомец</span></div></div>`);
+    }
+
+    function goTo(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        const nav = document.getElementById('nav-bar'), head = document.getElementById('main-header');
+        if(['feed', 'filter-screen'].includes(id)) { nav.style.display='flex'; head.style.display=(id==='feed')?'flex':'none'; }
+        else { nav.style.display='none'; head.style.display='none'; }
+        if(id === 'favs') renderFavs(); if(id === 'my-pets') renderMyPets();
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(id==='feed') document.querySelectorAll('.nav-item')[0].classList.add('active');
+        if(id==='filter-screen') document.querySelectorAll('.nav-item')[1].classList.add('active');
+        if(id==='favs') document.querySelectorAll('.nav-item')[2].classList.add('active');
+        if(id==='add-screen') document.querySelectorAll('.nav-item')[3].classList.add('active');
+    }
+
+    function openFilterScreen() { goTo('filter-screen'); }
+    function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2500); }
+    function setTheme(t) { document.body.removeAttribute('data-theme'); if(t!=='light') document.body.setAttribute('data-theme', t); }
+    function toggleWideMode() { const t = document.getElementById('wide-toggle'); t.classList.toggle('on'); document.body.classList.toggle('wide-mode'); localStorage.setItem('pm_wide', t.classList.contains('on')); }
+</script>
 </body>
 </html>
