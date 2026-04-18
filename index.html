@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PetMatch - Демо</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f2f5;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 768px) {
+            body {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 20px;
+            }
+            .app-container {
+                min-height: calc(100vh - 40px);
+                border-radius: 20px;
+                overflow: hidden;
+            }
+        }
+
+        .header {
+            padding: 12px 20px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fd5c63;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: background 0.2s;
+        }
+
+        .header-btn:hover { background: #f5f5f5; }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            overflow-x: auto;
+        }
+
+        .filters::-webkit-scrollbar { display: none; }
+
+        .filter-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #fd5c63;
+            border-color: #fd5c63;
+            color: #fff;
+        }
+
+        .card-container {
+            position: relative;
+            height: 480px;
+            margin: 20px;
+            touch-action: none;
+        }
+
+        @media (min-width: 768px) {
+            .card-container { height: 420px; }
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            touch-action: none;
+        }
+
+        .card:active { cursor: grabbing; }
+
+        .card-image {
+            width: 100%;
+            height: 78%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .card-gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 45%;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .card-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            color: #fff;
+            z-index: 2;
+        }
+
+        .pet-name {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .pet-meta {
+            font-size: 15px;
+            opacity: 0.9;
+            margin-bottom: 6px;
+        }
+
+        .pet-desc {
+            font-size: 13px;
+            line-height: 1.4;
+            opacity: 0.8;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 10px 20px 25px;
+        }
+
+        .action-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .action-btn:hover { transform: scale(1.08); }
+
+        .dislike-btn {
+            background: #fff;
+            color: #fd5c63;
+        }
+
+        .like-btn {
+            background: #fd5c63;
+            color: #fff;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 20px 20px;
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            color: #999;
+            font-size: 11px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active { color: #fd5c63; }
+        .nav-icon { font-size: 22px; }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-icon { font-size: 60px; margin-bottom: 16px; }
+        .empty-title { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 8px; }
+        .empty-text { color: #999; font-size: 15px; margin-bottom: 24px; }
+
+        .favorites-list { padding: 16px; }
+
+        .favorite-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #fff;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .favorite-item:hover { transform: translateX(4px); }
+
+        .favorite-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .favorite-info { flex: 1; }
+        .favorite-name { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 3px; }
+        .favorite-status { font-size: 13px; color: #fd5c63; }
+
+        .chat-header {
+            padding: 12px 16px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+        .chat-user { flex: 1; }
+        .chat-name { font-weight: 700; font-size: 16px; }
+        .chat-status { font-size: 13px; color: #4CAF50; }
+
+        .chat-messages {
+            padding: 16px;
+            height: calc(100vh - 180px);
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        @media (min-width: 768px) {
+            .chat-messages { height: 320px; }
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .message-own {
+            margin-left: auto;
+            background: #fd5c63;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-other {
+            background: #fff;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .message-time { font-size: 11px; opacity: 0.7; margin-top: 4px; text-align: right; }
+
+        .chat-input-container {
+            padding: 12px 16px;
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: #f0f0f0;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 15px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fd5c63;
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .form-container { padding: 20px; }
+        .form-title { font-size: 22px; font-weight: 700; color: #333; margin-bottom: 20px; text-align: center; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #fd5c63; }
+        .form-textarea { min-height: 80px; resize: vertical; }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #fd5c63;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .pet-detail {
+            background: #fff;
+            min-height: 100vh;
+        }
+
+        .pet-detail-image {
+            width: 100%;
+            height: 50vh;
+            object-fit: cover;
+        }
+
+        @media (min-width: 768px) {
+            .pet-detail-image { height: 300px; }
+        }
+
+        .pet-detail-content { padding: 24px 20px; }
+
+        .pet-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .pet-detail-name { font-size: 28px; font-weight: 700; color: #333; }
+        .pet-detail-meta { font-size: 16px; color: #666; margin-top: 4px; }
+
+        .pet-detail-section { margin-bottom: 24px; }
+        .pet-detail-label { font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .pet-detail-text { font-size: 16px; color: #333; line-height: 1.5; }
+
+        .pet-detail-owner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .owner-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .owner-info { flex: 1; }
+        .owner-name { font-weight: 700; color: #333; margin-bottom: 2px; }
+        .owner-status { font-size: 13px; color: #4CAF50; }
+
+        .chat-btn {
+            padding: 12px 24px;
+            background: #fd5c63;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .stamp {
+            position: absolute;
+            top: 40px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0;
+            transform: rotate(-15deg);
+            border: 4px solid;
+            z-index: 10;
+            transition: opacity 0.2s;
+        }
+
+        .stamp-like { right: 40px; color: #4CAF50; border-color: #4CAF50; }
+        .stamp-nope { left: 40px; color: #fd5c63; border-color: #fd5c63; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Главная -->
+        <div id="page-home" class="page active">
+            <div class="header">
+                <div class="header-btn" onclick="showPage('favorites')">❤️</div>
+                <div class="logo">🐾 PetMatch</div>
+                <div class="header-btn" onclick="showPage('add')">➕</div>
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" onclick="setFilter('all')">Все</button>
+                <button class="filter-btn" onclick="setFilter('Кот')">Коты</button>
+                <button class="filter-btn" onclick="setFilter('Собака')">Собаки</button>
+            </div>
+
+            <div class="card-container" id="card-container"></div>
+
+            <div class="actions" id="actions">
+                <button class="action-btn dislike-btn" onclick="swipe('left')">✕</button>
+                <button class="action-btn like-btn" onclick="swipe('right')">❤️</button>
+            </div>
+        </div>
+
+        <!-- Избранное -->
+        <div id="page-favorites" class="page">
+            <div class="header">
+                <div class="header-btn" onclick="showPage('home')">←</div>
+                <div class="logo">Избранное</div>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="favorites-list" id="favorites-list"></div>
+        </div>
+
+        <!-- Чат -->
+        <div id="page-chat" class="page">
+            <div class="chat-header">
+                <div class="header-btn" onclick="showPage('favorites')">←</div>
+                <img id="chat-avatar" src="" alt="" class="chat-avatar">
+                <div class="chat-user">
+                    <div class="chat-name" id="chat-name"></div>
+                    <div class="chat-status" id="chat-status">в сети</div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message message-other">
+                    Привет! 👋 Я хозяин этого питомца. Он очень ждёт новый дом!
+                    <div class="message-time">10:30</div>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Написать сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button class="send-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+
+        <!-- Страница питомца -->
+        <div id="page-pet" class="page">
+            <div class="header">
+                <div class="header-btn" onclick="showPage('home')">←</div>
+                <div class="logo">Профиль</div>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="pet-detail" id="pet-detail-content"></div>
+        </div>
+
+        <!-- Добавление -->
+        <div id="page-add" class="page">
+            <div class="header">
+                <div class="header-btn" onclick="showPage('home')">←</div>
+                <div class="logo">Новый питомец</div>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="form-container">
+                <form onsubmit="addPet(event)">
+                    <div class="form-group">
+                        <label class="form-label">Имя питомца</label>
+                        <input type="text" class="form-input" id="pet-name-input" placeholder="Например, Барсик" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Возраст</label>
+                        <input type="text" class="form-input" id="pet-age-input" placeholder="Например, 2 года" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Порода</label>
+                        <input type="text" class="form-input" id="pet-breed-input" placeholder="Например, Дворняга" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Тип</label>
+                        <select class="form-select" id="pet-type-input">
+                            <option value="Кот">Кот</option>
+                            <option value="Собака">Собака</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Описание</label>
+                        <textarea class="form-textarea" id="pet-desc-input" placeholder="Расскажите о характере..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ваше имя</label>
+                        <input type="text" class="form-input" id="owner-input" placeholder="Ваше имя" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Добавить питомца 🐾</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Навигация -->
+        <div class="nav" id="bottom-nav">
+            <div class="nav-item active" onclick="showPage('home')">
+                <span class="nav-icon">🏠</span>
+                <span>Главная</span>
+            </div>
+            <div class="nav-item" onclick="showPage('favorites')">
+                <span class="nav-icon">❤️</span>
+                <span>Избранное</span>
+            </div>
+            <div class="nav-item" onclick="showPage('add')">
+                <span class="nav-icon">➕</span>
+                <span>Добавить</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+// Данные питомцев
+const petsData = [
+  {
+    id: 1,
+    name: "Барсик",
+    age: "2 года",
+    breed: "Дворняга",
+    type: "Кот",
+    description: "Ласковый и игривый котик. Обожает мурлыкать и спать на коленях. Приучен к лотку.",
+    image: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600&h=800&fit=crop",
+    owner: "Анна"
+  },
+  {
+    id: 2,
+    name: "Рекс",
+    age: "1.5 года",
+    breed: "Немецкая овчарка",
+    type: "Собака",
+    description: "Верный друг и защитник. Очень умный, знает команды. Любит бегать и играть с мячом.",
+    image: "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=600&h=800&fit=crop",
+    owner: "Максим"
+  },
+  {
+    id: 3,
+    name: "Мурка",
+    age: "8 месяцев",
+    breed: "Шотландская",
+    type: "Кот",
+    description: "Маленькая пушистая красавица. Очень ласковая, любит сидеть на ручках. Ищет теплый дом.",
+    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&h=800&fit=crop",
+    owner: "Ольга"
+  },
+  {
+    id: 4,
+    name: "Шарик",
+    age: "3 года",
+    breed: "Лабрадор",
+    type: "Собака",
+    description: "Добрейшая душа! Обожает детей и взрослых. Всегда готов к прогулке и играм.",
+    image: "https://images.unsplash.com/photo-1591769225440-811ad7d6eca6?w=600&h=800&fit=crop",
+    owner: "Иван"
+  },
+  {
+    id: 5,
+    name: "Снежок",
+    age: "1 год",
+    breed: "Персидская",
+    type: "Кот",
+    description: "Белоснежный красавец с голубыми глазами. Спокойный, любит тишину и уют.",
+    image: "https://images.unsplash.com/photo-1513245543132-31f507417b26?w=600&h=800&fit=crop",
+    owner: "Елена"
+  },
+  {
+    id: 6,
+    name: "Тузик",
+    age: "2.5 года",
+    breed: "Джек-рассел",
+    type: "Собака",
+    description: "Энергичный малыш! Полон жизни и радости. Нужен активный хозяин.",
+    image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&h=800&fit=crop",
+    owner: "Дмитрий"
+  },
+  {
+    id: 7,
+    name: "Луна",
+    age: "6 месяцев",
+    breed: "Русская голубая",
+    type: "Кот",
+    description: "Нежная и тихая кошечка. Любит смотреть в окно и мурлыкать. Идеальный компаньон.",
+    image: "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=600&h=800&fit=crop",
+    owner: "Мария"
+  },
+  {
+    id: 8,
+    name: "Бобик",
+    age: "4 года",
+    breed: "Бигль",
+    type: "Собака",
+    description: "Очаровательный обжора! Любит вкусно поесть и гулять. Дружит со всеми.",
+    image: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=600&h=800&fit=crop",
+    owner: "Алексей"
+  },
+  {
+    id: 9,
+    name: "Масяня",
+    age: "1 год",
+    breed: "Мейн-кун",
+    type: "Кот",
+    description: "Большая и пушистая красавица! Характер спокойный, любит обнимашки.",
+    image: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=600&h=800&fit=crop",
+    owner: "Наталья"
+  },
+  {
+    id: 10,
+    name: "Граф",
+    age: "3.5 года",
+    breed: "Доберман",
+    type: "Собака",
+    description: "Благородный и умный. Отличный охранник и друг. Нужен опытный хозяин.",
+    image: "https://images.unsplash.com/photo-1568572933382-74d440642117?w=600&h=800&fit=crop",
+    owner: "Сергей"
+  }
+];
+
+// Состояние
+let pets = [...petsData];
+let currentFilter = 'all';
+let currentIndex = 0;
+let likedPets = [];
+let messages = {};
+let currentChatPet = null;
+let isDragging = false;
+let startX = 0;
+let currentCard = null;
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', () => {
+  renderCard();
+  updateFavorites();
+});
+
+function getFilteredPets() {
+  if (currentFilter === 'all') return pets;
+  return pets.filter(p => p.type === currentFilter);
+}
+
+function getCurrentPet() {
+  const filtered = getFilteredPets();
+  return filtered[currentIndex] || null;
+}
+
+function renderCard() {
+  const container = document.getElementById('card-container');
+  const actions = document.getElementById('actions');
+  const pet = getCurrentPet();
+
+  if (!pet) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🎉</div>
+        <div class="empty-title">Все просмотрены!</div>
+        <div class="empty-text">Вы посмотрели всех питомцев</div>
+        <button class="btn-primary" onclick="resetApp()">Начать заново</button>
+      </div>
+    `;
+    actions.style.display = 'none';
+    return;
+  }
+
+  actions.style.display = 'flex';
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="stamp stamp-like">ЛАЙК</div>
+    <div class="stamp stamp-nope">НЕТ</div>
+    <img src="${pet.image}" alt="${pet.name}" class="card-image" onclick="openPetDetail(${JSON.stringify(pet).replace(/"/g, '&quot;')})">
+    <div class="card-gradient" onclick="openPetDetail(${JSON.stringify(pet).replace(/"/g, '&quot;')})"></div>
+    <div class="card-info" onclick="openPetDetail(${JSON.stringify(pet).replace(/"/g, '&quot;')})">
+      <div class="pet-name">${pet.name}</div>
+      <div class="pet-meta">${pet.breed} • ${pet.age}</div>
+      <div class="pet-desc">${pet.description}</div>
+    </div>
+  `;
+
+  card.addEventListener('mousedown', handleDragStart);
+  card.addEventListener('touchstart', handleDragStart, {passive: true});
+
+  container.innerHTML = '';
+  container.appendChild(card);
+  currentCard = card;
+}
+
+function handleDragStart(e) {
+  if (!currentCard) return;
+  isDragging = true;
+  startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+  currentCard.style.transition = 'none';
+
+  document.addEventListener('mousemove', handleDragMove);
+  document.addEventListener('touchmove', handleDragMove, {passive: true});
+  document.addEventListener('mouseup', handleDragEnd);
+  document.addEventListener('touchend', handleDragEnd);
+}
+
+function handleDragMove(e) {
+  if (!isDragging || !currentCard) return;
+  const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+  const deltaX = x - startX;
+  const rotate = deltaX / 15;
+
+  currentCard.style.transform = `translateX(${deltaX}px) rotate(${rotate}deg)`;
+
+  if (deltaX > 50) {
+    currentCard.classList.add('show-like');
+    currentCard.classList.remove('show-nope');
+  } else if (deltaX < -50) {
+    currentCard.classList.add('show-nope');
+    currentCard.classList.remove('show-like');
+  } else {
+    currentCard.classList.remove('show-like', 'show-nope');
+  }
+}
+
+function handleDragEnd(e) {
+  if (!isDragging || !currentCard) return;
+  isDragging = false;
+
+  const x = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
+  const deltaX = x - startX;
+
+  document.removeEventListener('mousemove', handleDragMove);
+  document.removeEventListener('touchmove', handleDragMove);
+  document.removeEventListener('mouseup', handleDragEnd);
+  document.removeEventListener('touchend', handleDragEnd);
+
+  if (Math.abs(deltaX) > 100) {
+    swipe(deltaX > 0 ? 'right' : 'left');
+  } else {
+    currentCard.style.transition = 'transform 0.3s ease';
+    currentCard.style.transform = 'translateX(0) rotate(0)';
+    currentCard.classList.remove('show-like', 'show-nope');
+  }
+}
+
+function swipe(direction) {
+  const pet = getCurrentPet();
+  if (!pet || !currentCard) return;
+
+  currentCard.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+
+  if (direction === 'right') {
+    currentCard.style.transform = 'translateX(150%) rotate(30deg)';
+    currentCard.style.opacity = '0';
+
+    // Добавляем в избранное сразу
+    if (!likedPets.find(p => p.id === pet.id)) {
+      likedPets.push(pet);
+    }
+    updateFavorites();
+  } else {
+    currentCard.style.transform = 'translateX(-150%) rotate(-30deg)';
+    currentCard.style.opacity = '0';
+  }
+
+  setTimeout(() => {
+    currentIndex++;
+    renderCard();
+  }, 400);
+}
+
+function setFilter(filter) {
+  currentFilter = filter;
+  currentIndex = 0;
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.textContent === (filter === 'all' ? 'Все' : filter === 'Кот' ? 'Коты' : 'Собаки')) {
+      btn.classList.add('active');
+    }
+  });
+
+  renderCard();
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (page === 'home' || page === 'favorites' || page === 'add') {
+    document.querySelectorAll('.nav-item').forEach((n, i) => {
+      if ((page === 'home' && i === 0) || (page === 'favorites' && i === 1) || (page === 'add' && i === 2)) {
+        n.classList.add('active');
+      }
+    });
+  }
+
+  if (page === 'favorites') updateFavorites();
+}
+
+function updateFavorites() {
+  const list = document.getElementById('favorites-list');
+
+  if (likedPets.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">💔</div>
+        <div class="empty-title">Пока нет избранного</div>
+        <div class="empty-text">Свайпайте вправо, чтобы добавить!</div>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = likedPets.map(pet => `
+    <div class="favorite-item" onclick="openChat(${JSON.stringify(pet).replace(/"/g, '&quot;')})">
+      <img src="${pet.image}" alt="${pet.name}" class="favorite-avatar">
+      <div class="favorite-info">
+        <div class="favorite-name">${pet.name}</div>
+        <div class="favorite-status">Нажмите, чтобы написать...</div>
+      </div>
+      💬
+    </div>
+  `).join('');
+}
+
+function openChat(pet) {
+  currentChatPet = typeof pet === 'string' ? JSON.parse(pet) : pet;
+  document.getElementById('chat-avatar').src = currentChatPet.image;
+  document.getElementById('chat-name').textContent = currentChatPet.owner;
+
+  const chatMessages = messages[currentChatPet.id] || [];
+  const container = document.getElementById('chat-messages');
+  container.innerHTML = `
+    <div class="message message-other">
+      Привет! 👋 Я хозяин ${currentChatPet.name}. Он очень ждёт новый дом!
+      <div class="message-time">10:30</div>
+    </div>
+  `;
+
+  chatMessages.forEach(msg => {
+    container.innerHTML += `
+      <div class="message ${msg.own ? 'message-own' : 'message-other'}">
+        ${msg.text}
+        <div class="message-time">${msg.time}</div>
+      </div>
+    `;
+  });
+
+  container.scrollTop = container.scrollHeight;
+  showPage('chat');
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || !currentChatPet) return;
+
+  const time = new Date().toLocaleTimeString('ru', {hour: '2-digit', minute:'2-digit'});
+
+  if (!messages[currentChatPet.id]) messages[currentChatPet.id] = [];
+  messages[currentChatPet.id].push({text, own: true, time});
+
+  const container = document.getElementById('chat-messages');
+  container.innerHTML += `
+    <div class="message message-own">
+      ${text}
+      <div class="message-time">${time}</div>
+    </div>
+  `;
+
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+
+  // Имитация ответа владельца
+  setTimeout(() => {
+    const replyTime = new Date().toLocaleTimeString('ru', {hour: '2-digit', minute:'2-digit'});
+    const reply = `Привет! Да, ${currentChatPet.name} ещё ищет дом. Когда сможете приехать познакомиться?`;
+
+    messages[currentChatPet.id].push({text: reply, own: false, time: replyTime});
+
+    container.innerHTML += `
+      <div class="message message-other">
+        ${reply}
+        <div class="message-time">${replyTime}</div>
+      </div>
+    `;
+    container.scrollTop = container.scrollHeight;
+  }, 2000);
+}
+
+function openPetDetail(pet) {
+  currentChatPet = typeof pet === 'string' ? JSON.parse(pet) : pet;
+  const container = document.getElementById('pet-detail-content');
+  const isLiked = likedPets.find(p => p.id === currentChatPet.id);
+
+  container.innerHTML = `
+    <img src="${currentChatPet.image}" alt="${currentChatPet.name}" class="pet-detail-image">
+    <div class="pet-detail-content">
+      <div class="pet-detail-header">
+        <div>
+          <div class="pet-detail-name">${currentChatPet.name}</div>
+          <div class="pet-detail-meta">${currentChatPet.breed} • ${currentChatPet.age}</div>
+        </div>
+      </div>
+
+      <div class="pet-detail-section">
+        <div class="pet-detail-label">О питомце</div>
+        <div class="pet-detail-text">${currentChatPet.description}</div>
+      </div>
+
+      <div class="pet-detail-section">
+        <div class="pet-detail-label">Тип</div>
+        <div class="pet-detail-text">${currentChatPet.type}</div>
+      </div>
+
+      <div class="pet-detail-section">
+        <div class="pet-detail-label">Порода</div>
+        <div class="pet-detail-text">${currentChatPet.breed}</div>
+      </div>
+
+      <div class="pet-detail-section">
+        <div class="pet-detail-label">Возраст</div>
+        <div class="pet-detail-text">${currentChatPet.age}</div>
+      </div>
+
+      <div class="pet-detail-owner">
+        <div class="owner-avatar">${currentChatPet.owner.charAt(0)}</div>
+        <div class="owner-info">
+          <div class="owner-name">${currentChatPet.owner}</div>
+          <div class="owner-status">в сети</div>
+        </div>
+        <button class="chat-btn" onclick="openChatFromDetail()">Написать</button>
+      </div>
+    </div>
+  `;
+
+  showPage('pet');
+}
+
+function openChatFromDetail() {
+  openChat(currentChatPet);
+}
+
+function addPet(e) {
+  e.preventDefault();
+
+  const newPet = {
+    id: Date.now(),
+    name: document.getElementById('pet-name-input').value,
+    age: document.getElementById('pet-age-input').value,
+    breed: document.getElementById('pet-breed-input').value,
+    type: document.getElementById('pet-type-input').value,
+    description: document.getElementById('pet-desc-input').value,
+    owner: document.getElementById('owner-input').value,
+    image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&h=800&fit=crop'
+  };
+
+  pets.unshift(newPet);
+  currentIndex = 0;
+
+  document.getElementById('pet-name-input').value = '';
+  document.getElementById('pet-age-input').value = '';
+  document.getElementById('pet-breed-input').value = '';
+  document.getElementById('pet-desc-input').value = '';
+  document.getElementById('owner-input').value = '';
+
+  showPage('home');
+  renderCard();
+}
+
+function resetApp() {
+  currentIndex = 0;
+  likedPets = [];
+  messages = {};
+  renderCard();
+}
+
+    </script>
+</body>
+</html>
