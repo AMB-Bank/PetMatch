@@ -141,14 +141,6 @@
 
         <!-- FEED -->
         <div id="feed" class="screen">
-            <div style="padding:10px 16px; background:var(--bg-card); border-bottom:1px solid rgba(0,0,0,0.05);">
-                <div style="display:flex; align-items:center; background:var(--bg-app); border-radius:14px; padding:8px 14px; gap:8px;">
-                    <span class="material-icons-round" style="color:var(--text-sec); font-size:20px;">search</span>
-                    <input id="feed-search" type="text" placeholder="Найти питомца по имени..." style="border:none; background:transparent; flex:1; font-size:0.95rem; color:var(--text-main); outline:none;" oninput="onFeedSearch(this.value)">
-                    <span class="material-icons-round" id="feed-search-clear" style="color:var(--text-sec); font-size:18px; cursor:pointer; display:none;" onclick="clearFeedSearch()">close</span>
-                </div>
-            </div>
-            <div id="feed-search-results" style="display:none; flex:1; overflow-y:auto; padding:16px; display:none; flex-direction:column; gap:12px;"></div>
             <div class="feed-container" id="feed-cards"><div class="card-stack" id="stack"></div></div>
             <div class="controls">
                 <button class="btn-act btn-pass" onclick="triggerSwipe('left')"><span class="material-icons-round">close</span></button>
@@ -464,8 +456,10 @@
         // Real-time listener — updates all devices instantly
         if(!db) return;
         if(petsUnsub) petsUnsub();
-        petsUnsub = db.collection('pets').orderBy('createdAt','desc').limit(100).onSnapshot(snap => {
+        petsUnsub = db.collection('pets').limit(100).onSnapshot(snap => {
             let fresh = []; snap.forEach(d => fresh.push({id:d.id, ...d.data()}));
+            // Sort client-side to avoid Firestore index errors with mixed date types
+            fresh.sort((a,b) => (b.createdAt?.seconds||b.createdAt||0) - (a.createdAt?.seconds||a.createdAt||0));
             if(fresh.length > 0) { allPets = fresh; displayPets=[...allPets]; applyFiltersLocally(); currentIdx=0; renderCard(); }
         }, () => {});
     }
