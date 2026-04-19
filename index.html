@@ -141,7 +141,15 @@
 
         <!-- FEED -->
         <div id="feed" class="screen">
-            <div class="feed-container"><div class="card-stack" id="stack"></div></div>
+            <div style="padding:10px 16px; background:var(--bg-card); border-bottom:1px solid rgba(0,0,0,0.05);">
+                <div style="display:flex; align-items:center; background:var(--bg-app); border-radius:14px; padding:8px 14px; gap:8px;">
+                    <span class="material-icons-round" style="color:var(--text-sec); font-size:20px;">search</span>
+                    <input id="feed-search" type="text" placeholder="Найти питомца по имени..." style="border:none; background:transparent; flex:1; font-size:0.95rem; color:var(--text-main); outline:none;" oninput="onFeedSearch(this.value)">
+                    <span class="material-icons-round" id="feed-search-clear" style="color:var(--text-sec); font-size:18px; cursor:pointer; display:none;" onclick="clearFeedSearch()">close</span>
+                </div>
+            </div>
+            <div id="feed-search-results" style="display:none; flex:1; overflow-y:auto; padding:16px; display:none; flex-direction:column; gap:12px;"></div>
+            <div class="feed-container" id="feed-cards"><div class="card-stack" id="stack"></div></div>
             <div class="controls">
                 <button class="btn-act btn-pass" onclick="triggerSwipe('left')"><span class="material-icons-round">close</span></button>
                 <button class="btn-act btn-info" onclick="openPetInfo(currentPet)"><span class="material-icons-round">info</span></button>
@@ -458,7 +466,7 @@
         if(petsUnsub) petsUnsub();
         petsUnsub = db.collection('pets').orderBy('createdAt','desc').limit(100).onSnapshot(snap => {
             let fresh = []; snap.forEach(d => fresh.push({id:d.id, ...d.data()}));
-            if(fresh.length > 0) { allPets = fresh; displayPets=[...allPets]; applyFiltersLocally(); renderCard(); }
+            if(fresh.length > 0) { allPets = fresh; displayPets=[...allPets]; applyFiltersLocally(); currentIdx=0; renderCard(); }
         }, () => {});
     }
 
@@ -575,7 +583,7 @@
     }
 
     // 5. Filter Logic
-    function selectChip(el,t,v){ el.classList.toggle('selected'); }
+    function selectChip(el,t,v){ el.classList.toggle('selected'); applyFilters(); }
     function applyFiltersLocally() {
         displayPets = allPets.filter(p => {
             const nMatch = !filters.name || p.name.toLowerCase().includes(filters.name) || (p.bio && p.bio.toLowerCase().includes(filters.name));
@@ -604,9 +612,26 @@
     function handleFileSelect(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
-
             const reader = new FileReader();
-            reader.onload = e => { currentFileBase64 = e.target.result; document.getElementById('file-label-ui').classList.add('has-file'); document.getElementById('file-label-ui').querySelector('span').innerText = 'Выбрано: '+file.name; };
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => {
+                    // Сжимаем до макс 800px и JPEG 0.75 — влезает в лимит Firestore (1MB)
+                    const MAX = 800;
+                    let w = img.width, h = img.height;
+                    if (w > MAX || h > MAX) {
+                        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+                        else { w = Math.round(w * MAX / h); h = MAX; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    currentFileBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                    document.getElementById('file-label-ui').classList.add('has-file');
+                    document.getElementById('file-label-ui').querySelector('span').innerText = 'Выбрано: ' + file.name;
+                };
+                img.src = e.target.result;
+            };
             reader.readAsDataURL(file);
         }
     }
@@ -631,7 +656,7 @@
         const finalBio = bio;
         const imgUrl = currentFileBase64;
         
-        const newP = { name:nm, age, breed, type:petType, bio:finalBio, location:loc||'Не указано', owner:currentUser.displayName||currentUser.email.split('@')[0]||'User', ownerId:currentUser.uid, img:imgUrl, traits:[], createdAt:Date.now() };
+        const newP = { name:nm, age, breed, type:petType, bio:finalBio, location:loc||'Не указано', owner:currentUser.displayName||currentUser.email.split('@')[0]||'User', ownerId:currentUser.uid, img:imgUrl, traits:[], createdAt:firebase.firestore.FieldValue.serverTimestamp() };
         
         // Local Update Instant → auto adds to "Мои питомцы"
         allPets.unshift(newP); displayPets=[...allPets]; currentIdx=0; renderCard();
