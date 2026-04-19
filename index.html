@@ -467,14 +467,25 @@
 
     function seedTestPets() {
         const tr = ['Игривый','Ласковый','Спокойный','Для квартиры','Для дома','С детьми'];
-        const br = ['Корги','Британец','Хаски','Мейн-кун','Лабрадор','Сфинкс'];
-        const nm = ['Рекс','Мася','Бобик','Соня','Рыжик','Тузик'];
-        allPets = Array.from({length:20},(_,i)=>({
-            id:'seed_'+i, name:nm[i%6], age:i%8, breed:br[i%6], type:i%2?'cat':'dog', location:'Москва',
+        const catBreeds = ['Британец','Мейн-кун','Сфинкс','Бенгал','Персидский','Сиамский'];
+        const dogBreeds = ['Корги','Хаски','Лабрадор','Самоед','Шиба-ину','Бордер-колли'];
+        const catNames = ['Мася','Соня','Рыжик','Луна','Пуся','Снежок'];
+        const dogNames = ['Рекс','Бобик','Тузик','Граф','Барон','Шарик'];
+        const catImgs = ['1514888286974-6c03e2ca1dba','1573865526748-fe33a6929e98','1561948955-570b270e7c36','1592194996308-7b43878e84a6','1548247416-ec66f4900b2e','1574158622682-e029bf6f8b13'];
+        const dogImgs = ['1543466835-00a7907e9de1','1587300003-00028b9b6a9b','1552053831-71594a27632d','1558929996-da64ba858215','1537151625747-768eb2d4cca4','1583511655826-05700d52f4d1'];
+        const cats = Array.from({length:10},(_,i)=>({
+            id:'seed_cat_'+i, name:catNames[i%6], age:(i%7)+1, breed:catBreeds[i%6], type:'cat', location:'Москва',
             bio:'Ищет семью. Характер: '+tr[i%6]+'.', owner:'TestOwner', ownerId:'test',
-            img:`https://images.unsplash.com/photo-${i%2?'1543466835-00a7907e9de1':'1514888286974-6c03e2ca1dba'}?w=500&sig=${i}`,
-            traits: [tr[i%3]], createdAt:firebase.firestore.Timestamp.now()
+            img:`https://images.unsplash.com/photo-${catImgs[i%6]}?w=500&sig=${i}`,
+            traits:[tr[i%3]], createdAt:firebase.firestore.Timestamp.now()
         }));
+        const dogs = Array.from({length:10},(_,i)=>({
+            id:'seed_dog_'+i, name:dogNames[i%6], age:(i%8)+1, breed:dogBreeds[i%6], type:'dog', location:'Москва',
+            bio:'Ищет семью. Характер: '+tr[i%6]+'.', owner:'TestOwner', ownerId:'test',
+            img:`https://images.unsplash.com/photo-${dogImgs[i%6]}?w=500&sig=${i+100}`,
+            traits:[tr[i%3]], createdAt:firebase.firestore.Timestamp.now()
+        }));
+        allPets = [...cats, ...dogs];
     }
 
     function renderCard() {
@@ -596,7 +607,7 @@
     function handleFileSelect(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            if (file.size > 500000) { showToast('Фото слишком большое (макс 500КБ)'); input.value=''; currentFileBase64=null; return; }
+
             const reader = new FileReader();
             reader.onload = e => { currentFileBase64 = e.target.result; document.getElementById('file-label-ui').classList.add('has-file'); document.getElementById('file-label-ui').querySelector('span').innerText = 'Выбрано: '+file.name; };
             reader.readAsDataURL(file);
@@ -797,23 +808,22 @@
     // 9. My Pets
     function renderMyPets() {
         const l=document.getElementById('my-pets-list'); l.innerHTML=''; const my=allPets.filter(p=>p.ownerId===currentUser.uid);
-        if(!my.length) l.innerHTML='<p style="text-align:center;width:100%;grid-column:1/-1;padding:40px;color:var(--text-sec)">Вы еще не добавили питомцев</p>';
-        else my.forEach(p=>{
-            const div = document.createElement('div');
-            div.className = 'fav-item';
-            div.style.flexDirection = 'column';
-            div.style.height = 'auto';
-            div.innerHTML = `
-                <img src="${p.img}" class="fav-img" style="width:100%; height:140px; object-fit:cover; cursor:pointer;" onclick="openPetInfo(allPets.find(x=>x.id==='${p.id}'))">
-                <div class="fav-info" style="width:100%; flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; display:flex;">
-                    <div><b>${p.name}</b><br><span style="font-size:0.8rem;color:var(--text-sec)">${p.breed||'Метис'} · ${p.age||0} г.</span></div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="fav-btn" style="background:var(--primary-light); color:var(--primary);" onclick="editPet('${p.id}')">✏️</button>
-                        <button class="fav-btn" style="background:#fee2e2; color:var(--danger);" onclick="deletePet('${p.id}')">🗑</button>
-                    </div>
-                </div>`;
-            l.appendChild(div);
-        });
+        if(!my.length) { l.innerHTML='<p style="text-align:center;width:100%;grid-column:1/-1;padding:40px;color:var(--text-sec)">Вы еще не добавили питомцев</p>'; return; }
+        const cats = my.filter(p=>p.type==='cat');
+        const dogs = my.filter(p=>p.type==='dog');
+        const other = my.filter(p=>p.type!=='cat'&&p.type!=='dog');
+        const section = (emoji, title, list) => {
+            if(!list.length) return;
+            l.innerHTML+=`<div style="grid-column:1/-1;padding:8px 0 4px;font-size:1.1rem;font-weight:700;color:var(--text-main);border-bottom:2px solid var(--primary-light);margin-bottom:4px;">${emoji} ${title}</div>`;
+            list.forEach(p=>{
+                const div=document.createElement('div'); div.className='fav-item'; div.style.flexDirection='column'; div.style.height='auto';
+                div.innerHTML=`<img src="${p.img}" class="fav-img" style="width:100%;height:140px;object-fit:cover;cursor:pointer;" onclick="openPetInfo(allPets.find(x=>x.id==='${p.id}'))"><div class="fav-info" style="width:100%;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;display:flex;"><div><b>${p.name}</b><br><span style="font-size:0.8rem;color:var(--text-sec)">${p.breed||'Метис'} · ${p.age||0} г.</span></div><div style="display:flex;gap:8px;"><button class="fav-btn" style="background:var(--primary-light);color:var(--primary);" onclick="editPet('${p.id}')">✏️</button><button class="fav-btn" style="background:#fee2e2;color:var(--danger);" onclick="deletePet('${p.id}')">🗑</button></div></div>`;
+                l.appendChild(div);
+            });
+        };
+        section('🐱','Коты',cats);
+        section('🐶','Собаки',dogs);
+        section('🐾','Другие',other);
     }
 
     function deletePet(petId) {
@@ -848,8 +858,18 @@
 
     function renderFavs(){ 
         const l=document.getElementById('fav-list'); l.innerHTML='';
-        if(!favorites.length) l.innerHTML='<p style="text-align:center;width:100%;grid-column:1/-1;padding:40px;color:var(--text-sec)">Пусто. Лайкайте питомцев!</p>';
-        else favorites.forEach(p=>{l.innerHTML+=`<div class="fav-item"><img src="${p.img}" class="fav-img"><div class="fav-info"><b>${p.name}</b><span style="font-size:0.8rem;color:var(--text-sec)">${p.breed}</span><div style="display:flex;gap:8px;margin-top:5px"><button class="fav-btn" onclick="openChat('${p.id}')">💬 Чат</button><button class="fav-btn" style="background:#fee2e2;color:var(--danger);" onclick="removeFromFavorites('${p.id}')">🗑</button></div></div></div>`;});
+        if(!favorites.length) { l.innerHTML='<p style="text-align:center;width:100%;grid-column:1/-1;padding:40px;color:var(--text-sec)">Пусто. Лайкайте питомцев!</p>'; return; }
+        const cats = favorites.filter(p=>p.type==='cat');
+        const dogs = favorites.filter(p=>p.type==='dog');
+        const other = favorites.filter(p=>p.type!=='cat'&&p.type!=='dog');
+        const section = (emoji,title,list) => {
+            if(!list.length) return;
+            l.innerHTML+=`<div style="grid-column:1/-1;padding:8px 0 4px;font-size:1.1rem;font-weight:700;color:var(--text-main);border-bottom:2px solid var(--primary-light);margin-bottom:4px;">${emoji} ${title}</div>`;
+            list.forEach(p=>{l.innerHTML+=`<div class="fav-item"><img src="${p.img}" class="fav-img"><div class="fav-info"><b>${p.name}</b><span style="font-size:0.8rem;color:var(--text-sec)">${p.breed}</span><div style="display:flex;gap:8px;margin-top:5px"><button class="fav-btn" onclick="openChat('${p.id}')">💬 Чат</button><button class="fav-btn" style="background:#fee2e2;color:var(--danger);" onclick="removeFromFavorites('${p.id}')">🗑</button></div></div></div>`;});
+        };
+        section('🐱','Коты',cats);
+        section('🐶','Собаки',dogs);
+        section('🐾','Другие',other);
     }
 
     function removeFromFavorites(petId) {
