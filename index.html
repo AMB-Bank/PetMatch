@@ -448,21 +448,18 @@
     }
 
     // 2. Data Loading (Pets)
-    async function loadPets() {
-        // Load demo if empty
-        if(!allPets.length) seedTestPets();
-        displayPets = [...allPets]; 
-        applyFiltersLocally();
-        renderCard();
-        
-        // Fetch from DB in background
-        try {
-            if(db) {
-                const snap = await db.collection('pets').orderBy('createdAt','desc').limit(50).get();
-                let fresh = []; snap.forEach(d => fresh.push({id:d.id, ...d.data()}));
-                if(fresh.length > 0) { allPets = fresh; displayPets = [...allPets]; applyFiltersLocally(); renderCard(); }
-            }
-        } catch(e) {}
+    let petsUnsub = null;
+    function loadPets() {
+        // Show seeds instantly while Firebase loads
+        if(!allPets.length) { seedTestPets(); displayPets=[...allPets]; applyFiltersLocally(); renderCard(); }
+
+        // Real-time listener — updates all devices instantly
+        if(!db) return;
+        if(petsUnsub) petsUnsub();
+        petsUnsub = db.collection('pets').orderBy('createdAt','desc').limit(100).onSnapshot(snap => {
+            let fresh = []; snap.forEach(d => fresh.push({id:d.id, ...d.data()}));
+            if(fresh.length > 0) { allPets = fresh; displayPets=[...allPets]; applyFiltersLocally(); renderCard(); }
+        }, () => {});
     }
 
     function seedTestPets() {
