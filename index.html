@@ -764,7 +764,43 @@
     }
 
     // Pet info screen (shown first when tapping info button)
-    function openPetInfo(p) {
+    function onFeedSearch(val) {
+        const q = val.trim().toLowerCase();
+        const results = document.getElementById('feed-search-results');
+        const cards = document.getElementById('feed-cards');
+        const controls = document.querySelector('.controls');
+        const clearBtn = document.getElementById('feed-search-clear');
+        clearBtn.style.display = q ? 'block' : 'none';
+        if (!q) {
+            results.style.display = 'none';
+            cards.style.display = 'flex';
+            controls.style.display = 'flex';
+            return;
+        }
+        cards.style.display = 'none';
+        controls.style.display = 'none';
+        results.style.display = 'flex';
+        const found = allPets.filter(p => p.name.toLowerCase().includes(q) || (p.breed && p.breed.toLowerCase().includes(q)));
+        if (!found.length) {
+            results.innerHTML = '<p style="text-align:center;color:var(--text-sec);padding:40px 0;">Питомцы не найдены 🐾</p>';
+            return;
+        }
+        results.innerHTML = found.map(p => `
+            <div onclick="openPetInfo(allPets.find(x=>x.id==='${p.id}'))" style="display:flex;align-items:center;gap:14px;background:var(--bg-card);border-radius:16px;padding:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                <img src="${p.img}" style="width:60px;height:60px;border-radius:12px;object-fit:cover;flex-shrink:0;">
+                <div>
+                    <b style="font-size:1rem;">${p.name}</b>
+                    <div style="font-size:0.82rem;color:var(--text-sec);">${p.breed||'Метис'} · ${p.age||0} г. · ${p.type==='cat'?'🐱':'🐶'}</div>
+                    <div style="font-size:0.8rem;color:var(--text-sec);">📍 ${p.location||'Не указано'}</div>
+                </div>
+            </div>`).join('');
+    }
+
+    function clearFeedSearch() {
+        document.getElementById('feed-search').value = '';
+        onFeedSearch('');
+    }
+
         if (!p) return;
         currentPet = p;
         document.getElementById('pet-info-img').src = p.img || 'https://placehold.co/400x400?text=Нет+фото';
